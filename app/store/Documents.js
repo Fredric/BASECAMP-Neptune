@@ -6,7 +6,7 @@ Ext.define('BASECAMP.store.Documents', {
     ],
     proxy: {
         type: 'ajax',
-        url: 'data/documents.php',
+        url: 'resources/php/documents.php',
         reader: {
             type: 'json'
         }

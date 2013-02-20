@@ -7,7 +7,7 @@ Ext.define('BASECAMP.store.TodoLists', {
 	,
     proxy: {
         type: 'ajax',
-        url: 'data/todolists.php',
+        url: 'resources/php/todolists.php',
         reader: {
             type: 'json'
         }

@@ -19,7 +19,7 @@ Ext.define('BASECAMP.model.Project', {
     ],
     proxy: {
         type: 'ajax',
-        url: 'data/project.php',
+        url: 'resources/php/project.php',
         reader: {
             type: 'json'
         }

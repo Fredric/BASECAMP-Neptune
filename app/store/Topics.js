@@ -6,7 +6,7 @@ Ext.define('BASECAMP.store.Topics', {
     ],
     proxy: {
         type: 'ajax',
-        url: 'data/topics.php',
+        url: 'resources/php/topics.php',
         reader: {
             type: 'json'
         }

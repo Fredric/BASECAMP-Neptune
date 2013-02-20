@@ -3,7 +3,7 @@ Ext.define('BASECAMP.store.Projects', {
     model: 'BASECAMP.model.Project',
     proxy: {
         type: 'ajax',
-        url: 'data/projects.php',
+        url: 'resources/php/projects.php',
         reader: {
             type: 'json',
             root:'data'

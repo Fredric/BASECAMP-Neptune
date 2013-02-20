@@ -22,7 +22,7 @@ Ext.define('BASECAMP.model.TodoList', {
 
 	proxy: {
         type: 'ajax',
-        url: 'data/todolist.php',
+        url: 'resources/php/todolist.php',
         reader: {
             type: 'json'
         }

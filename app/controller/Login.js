@@ -25,7 +25,7 @@ Ext.define('BASECAMP.controller.Login', {
         var me = this;
 
         Ext.Ajax.request({
-            url: 'data/isloggedin.php',
+            url: 'resources/php/isloggedin.php',
             success: function (resp) {
                 var responseObject = Ext.JSON.decode(resp.responseText);
                 if (responseObject.success === false) {
