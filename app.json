@@ -1,0 +1,7 @@
+{
+    "name": "BASECAMP",
+    "requires": [{
+        "name": "ext-theme-neptune",
+        "version": "4.2.0"
+    }]
+}
