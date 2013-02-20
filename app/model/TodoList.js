@@ -26,7 +26,7 @@ Ext.define('BASECAMP.model.TodoList', {
         reader: {
             type: 'json'
         }
-    },
+    }
 /*
     associations: [
         {
