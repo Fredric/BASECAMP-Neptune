@@ -7,7 +7,7 @@ Ext.define('BASECAMP.view.topics.Grid', {
         mode:'MULTI'
     },
     columns:[
-        {header:'', dataIndex:'title', width:200, renderer:function (v) {
+        {header:'Topic', dataIndex:'title', width:200, renderer:function (v) {
             return '<b>' + v + '</b>';
         }},
         {header:'', dataIndex:'excerpt', flex:1},
