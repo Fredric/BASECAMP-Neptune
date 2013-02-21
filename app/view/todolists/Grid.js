@@ -16,7 +16,7 @@ Ext.define('BASECAMP.view.todolists.Grid', {
 			iconCls:'icon-plus-alt',
 			scale: 'medium',
 			handler: function () {
-				this.up('todolists').fireEvent('addTodolist');
+				this.up('todolistgrid').fireEvent('Add');
 				var grid = this.up('todolistgrid')
 				var newTodolist = grid.getStore().insert(0,{name:'', description:''});
 				grid.getPlugin('cellplugin').startEditByPosition({row:0, column:0});
@@ -46,6 +46,18 @@ Ext.define('BASECAMP.view.todolists.Grid', {
 			xtype: 'templatecolumn',
 			width: 150,
 			tpl: '<div class= "todolist-person"><img src="{creatoricon}"><span>{creator}</span></div>'
+		},
+		{
+			xtype: 'actioncolumn',
+			width: 40,
+			items: [
+				{
+					icon:'resources/images/delete.png',
+					handler: function (grid, rowIndex, colIndex) {
+						this.up('todolistgrid').fireEvent('Delete',grid.getStore(),grid.getStore().getAt(rowIndex));
+					}
+				}
+			]
 		}
 	]
 

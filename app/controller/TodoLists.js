@@ -16,6 +16,13 @@ Ext.define('BASECAMP.controller.TodoLists', {
 				onSelectTodoList: {
 					fn: me.navigateOpenModal,
 					buffer: 300
+				},
+				'edit':function(editor, e) {
+					e.grid.getStore().sync();
+				},
+				Delete:function(store, record){
+					store.remove(record);
+					store.sync()
 				}
 
 			},

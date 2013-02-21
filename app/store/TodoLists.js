@@ -9,10 +9,10 @@ Ext.define('BASECAMP.store.TodoLists', {
         type: 'ajax',
 		batchActions:false,
 		api: {
-		    create  : 'resources/php/createtodolist.php',
-		    read    : 'resources/php/todolists.php',
-		    update  : 'resources/php/updatetodolist.php',
-		    destroy : 'resources/php/deletetodolist.php'
+		    create  : 'resources/php/todolists/create.php',
+		    read    : 'resources/php/todolists/read.php',
+		    update  : 'resources/php/todolists/update.php',
+		    destroy : 'resources/php/todolists/destroy.php'
 		},
         reader: {
             type: 'json'
