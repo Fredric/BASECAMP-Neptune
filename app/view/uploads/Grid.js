@@ -11,8 +11,8 @@ Ext.define('BASECAMP.view.uploads.Grid', {
         {header: 'File Name', dataIndex: 'name', flex:1, renderer: function (v) {
             return '<b>' + v + '</b>';
         }},
-        {header: '', dataIndex: 'created_at'},
-        {header: '', dataIndex: 'updated_at'}
+        {xtype:'datecolumn', header: '', dataIndex: 'created_at'},
+        {xtype:'datecolumn', header: '', dataIndex: 'updated_at'}
 
     ]
 

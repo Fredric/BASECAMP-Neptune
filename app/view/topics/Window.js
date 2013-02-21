@@ -7,11 +7,20 @@ Ext.define('BASECAMP.view.topics.Window', {
     closeAction:'hide',
     requires:['Ext.form.Panel'],
     bodyStyle:'padding:10px',
-    layout:'fit',
+    layout:{
+		type: 'vbox',
+		align:'center'
+	},
     initComponent:function () {
         var me = this;
 
-
+		me.items = [
+			{
+				xtype:'container',
+				style:'color:#666666',
+				html:'<h1>Open Topics here</h1>'
+			}
+		]
 
         me.buttons = [
             {

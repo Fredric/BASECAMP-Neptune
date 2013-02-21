@@ -11,8 +11,8 @@ Ext.define('BASECAMP.view.topics.Grid', {
             return '<b>' + v + '</b>';
         }},
         {header:'', dataIndex:'excerpt', flex:1},
-        {header:'', dataIndex:'created_at'},
-        {header:'', dataIndex:'updated_at'}
+        {xtype:'datecolumn', header:'', dataIndex:'created_at'},
+        {xtype:'datecolumn', header:'', dataIndex:'updated_at'}
 
     ],
     initComponent:function () {

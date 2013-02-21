@@ -11,8 +11,8 @@ Ext.define('BASECAMP.view.todos.Grid', {
             return '<b>' + v + '</b>';
         }},
         {header: '', dataIndex: 'description', flex: 1},
-        {header: '', dataIndex: 'created_at'},
-        {header: '', dataIndex: 'updated_at'},
+        {xtype:'datecolumn', header: '', dataIndex: 'created_at'},
+        {xtype:'datecolumn', header: '', dataIndex: 'updated_at'},
         {header: '', dataIndex: 'starred'},
         {header: '', dataIndex: 'url'}
     ]

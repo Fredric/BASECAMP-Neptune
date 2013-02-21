@@ -1,6 +1,11 @@
 Ext.define('BASECAMP.view.todolists.Grid', {
 	extend: 'Ext.grid.Panel',
-	requires:['Ext.grid.plugin.CellEditing'],
+	requires:[
+		'Ext.grid.plugin.CellEditing',
+		'Ext.grid.column.Action',
+		'Ext.grid.column.Template',
+		'Ext.grid.column.Date'
+	],
 	alias: 'widget.todolistgrid',
 	store: 'TodoLists',
 	selModel: {
@@ -18,7 +23,7 @@ Ext.define('BASECAMP.view.todolists.Grid', {
 			handler: function () {
 				this.up('todolistgrid').fireEvent('Add');
 				var grid = this.up('todolistgrid')
-				var newTodolist = grid.getStore().insert(0,{name:'', description:''});
+				rid.getStore().insert(0,{name:'', description:''});
 				grid.getPlugin('cellplugin').startEditByPosition({row:0, column:0});
 			}
 		}
