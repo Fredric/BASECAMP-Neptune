@@ -1,10 +1,12 @@
 Ext.define('BASECAMP.controller.Info', {
 	extend: 'Abstract.controller.Navigation',
-	views: ['Info.UI'],
+	views: ['Info.UI','Info.EventGrid'],
+	models:['Event'],
+	stores:['Events'],
 	refs: [
 		{
 			ref: 'UI',
-			selector: 'info'
+			selector: 'info #body'
 		}
 	],
 	init: function () {

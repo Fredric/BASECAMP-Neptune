@@ -44,8 +44,8 @@ function basecamp_api_client($appName, $contactInfo, $accountId, $username,
 
         $query = in_array($method, array('GET','DELETE')) ? $params : array();
 
-        $payload = in_array($method, array('POST','PUT')) ? stripslashes(json_encode($params)) : array();
-
+        $payload = in_array($method, array('POST','PUT')) ? $_POST['data'] : array();
+   #		$payload = in_array($method, array('POST','PUT')) ? '{"name":"test","description":"test"}' : array();
         $request_headers = in_array($method, array('POST','PUT')) ? array("Content-Type: application/json; charset=utf-8", 'Expect:') : array();
         $request_headers[] = $helloHeader;
 
@@ -57,6 +57,7 @@ function basecamp_api_client($appName, $contactInfo, $accountId, $username,
 
         $statusCode = $response_headers['http_status_code'];
         if ($statusCode >= 400) {
+        	
             throw new Exception("HTTP error $statusCode:\n"
                                .print_r(compact('method', 'url', 'query',
                                                 'payload', 'request_headers',
@@ -97,6 +98,7 @@ function curl_append_query_($url, $query)
 function curl_setopts_($ch, $credentials, $method, $payload, $request_headers)
 {
     curl_setopt($ch, CURLOPT_USERPWD, $credentials);
+    curl_setopt($ch, CURLOPT_VERBOSE, true);
     curl_setopt($ch, CURLOPT_HEADER, true);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);

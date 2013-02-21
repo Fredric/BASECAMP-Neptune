@@ -65,16 +65,23 @@ Ext.define('BASECAMP.controller.Projects', {
 			app = me.application;
 
 		if (app.getProject() === null || app.getProject().getId() !== id) {
-			var myMask = Ext.create('Ext.LoadMask',{target:Ext.getBody(),msg:"Please wait..."});
-			myMask.show();
+			Ext.getBody().mask('Loading Project...')
 			Ext.ModelManager.getModel('BASECAMP.model.Project').load(id, {
 				success: function (project) {
 					app.setProject(project);
 					me.getProjectCombo().setValue(me.application.getProject().getId());
-					myMask.hide();
+					Ext.getBody().unmask()
 					callBack.call(scope, app.getProject());
 				}
 			});
+
+			var dt = Ext.Date.add(new Date, Ext.Date.MONTH, -5);
+			Ext.getStore('Events').load({
+				params:{
+					project:id,
+					since:dt
+				}
+			})
 
 		} else {
 			callBack.call(scope, app.getProject());

@@ -1,7 +1,9 @@
 <?php
+
 	require 'session.php';
+	
 	$basecamp = basecamp_api_client($appName, $appContact,
     $basecampAccountId, $basecampUsername, $basecampPassword);
-    $todos = $basecamp($_SERVER['REQUEST_METHOD'], '/projects/'.$_GET['project'].'/todolists.json');
-    echo json_encode($todos);
+    $events = $basecamp('GET', '/projects/'.$_GET['project'].'/events.json?since='.$_GET['since']);
+    echo json_encode($events);
 ?>

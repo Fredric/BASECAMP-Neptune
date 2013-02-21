@@ -11,7 +11,7 @@ Ext.define('BASECAMP.view.todolists.UI', {
         me.modal = Ext.create('BASECAMP.view.todolists.Window');
 
         me.items = [
-            {
+	        {
                 flex: 1,
                 xtype: 'todolistgrid'
             }

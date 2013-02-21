@@ -17,6 +17,7 @@ Ext.define('BASECAMP.controller.TodoLists', {
 					fn: me.navigateOpenModal,
 					buffer: 300
 				}
+
 			},
 			'todolistmodal': {
 				hide: me.navigateCloseModal
