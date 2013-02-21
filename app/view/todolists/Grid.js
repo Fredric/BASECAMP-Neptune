@@ -23,7 +23,7 @@ Ext.define('BASECAMP.view.todolists.Grid', {
 			handler: function () {
 				this.up('todolistgrid').fireEvent('Add');
 				var grid = this.up('todolistgrid')
-				rid.getStore().insert(0,{name:'', description:''});
+				grid.getStore().insert(0,{name:'', description:''});
 				grid.getPlugin('cellplugin').startEditByPosition({row:0, column:0});
 			}
 		}
