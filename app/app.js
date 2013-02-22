@@ -51,18 +51,58 @@ Ext.application({
     name: 'BASECAMP',
 
     models:[
+        'Document',
+        'Event',
+        'Name',
+        'Project',
+        'Todo',
+        'TodoList',
+        'Topic',
+        'Upload',
+        'User'
     ],
 
     views: [
-        'Main',
-        'Viewport'
+        'Info.EventGrid',
+        'Info.UI',
+        'Login',
+        'Viewport',
+        'documents.Grid',
+        'documents.UI',
+        'project.Selector',
+        'project.UI',
+        'testview',
+        'todolists.Grid',
+        'todolists.UI',
+        'todolists.Window',
+        'todos.Grid',
+        'topics.Grid',
+        'topics.UI',
+        'topics.Window',
+        'uploads.Grid',
+        'uploads.UI'
     ],
 
     stores: [
+        'Documents',
+        'Events',
+        'Projects',
+        'TodoLists',
+        'Todos',
+        'Topics',
+        'Uploads'
     ],
 
     controllers: [
-        'Main'
+        'Documents',
+        'Info',
+        'Login',
+        'Main',
+        'Navigation',
+        'Projects',
+        'TodoLists',
+        'Topics',
+        'Uploads'
     ],
 
     autoCreateViewport: true

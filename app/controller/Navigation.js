@@ -6,17 +6,21 @@ Ext.define('BASECAMP.controller.Navigation', {
 
 		//Navigation opening a project tab
 		Path.map("#/:project/:tab").to(function () {
-			me.getController('Projects').setProjectById(parseFloat(this.params.project), function () {
+
+				me.getController('Projects').setProjectById(parseFloat(this.params.project), function () {
 				me.getController('Projects').setTab(this.params.tab);
 			}, this);
+
 		});
 
 		//Navigation opening a modal Window inside a tab
 		Path.map("#/:project/:tab/:id").to(function () {
+
 			me.getController('Projects').setProjectById(parseFloat(this.params.project), function () {
 				me.getController('Projects').setTab(this.params.tab);
 				me.getController(this.params.tab).openModal(this.params.id);
 			}, this);
+
 		}).exit(function () {
 				me.getController(this.params.tab).closeModal();
 			});
@@ -28,8 +32,4 @@ Ext.define('BASECAMP.controller.Navigation', {
 		});
 		Path.listen();
 	}
-
-
-
-
 });

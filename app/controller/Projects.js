@@ -103,6 +103,7 @@ Ext.define('BASECAMP.controller.Projects', {
 	selectProjectByCombo: function (combo, records) {
 		var p = this.getProjectPanel();
 		var s = p.getLayout().getActiveItem().itemId;
+
 		Ext.util.History.add('/' + records[0].get('id') + "/" + s, true, true);
 	},
 	isTabDisabled:function(tab){
