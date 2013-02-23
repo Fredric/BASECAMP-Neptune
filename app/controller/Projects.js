@@ -16,30 +16,22 @@ Ext.define('BASECAMP.controller.Projects', {
 			ref: 'projectPanel',
 			selector: 'projectpanel'
 		}
+
 	],
 	init: function () {
 		var me = this;
 
 		me.control({
 			'projectselector > combo': {
-				select: {
-					fn: this.selectProjectByCombo
-				},
-				afterrender: function () {
-					this.getStore('Projects').load();
-				}
-			}
-			/*
-			 ,
-			 'projectpanel': {
-			 tabchange: {
-			 fn: this.navigateToTab
-			 }
-			 }*/,
+				select: me.selectProjectByCombo,
+				afterrender: me.loadProjects
+			},
 			'projectpanel tab': {
-				click: {
-					fn: this.navigateToTab
-				}
+				click: me.navigateToTab
+
+			},
+			'addprojectwindow': {
+				onSaveNewProject: me.createProject
 			}
 		});
 		me.getProjectsStore().on('load', function () {
@@ -48,6 +40,9 @@ Ext.define('BASECAMP.controller.Projects', {
 			}
 		});
 
+	},
+	loadProjects: function () {
+		this.getStore('Projects').load();
 	},
 	navigateToTab: function (tabcard) {
 		var me = this;
@@ -77,9 +72,9 @@ Ext.define('BASECAMP.controller.Projects', {
 
 			var dt = Ext.Date.add(new Date, Ext.Date.MONTH, -5);
 			Ext.getStore('Events').load({
-				params:{
-					project:id,
-					since:dt
+				params: {
+					project: id,
+					since: dt
 				}
 			})
 
@@ -92,9 +87,9 @@ Ext.define('BASECAMP.controller.Projects', {
 		this.getCenterPanel().layout.setActiveItem(1);
 		this.application.setTab(tab);
 
-		if(this.isTabDisabled(tab)){
+		if (this.isTabDisabled(tab)) {
 			Ext.util.History.add('/' + this.application.getProject().getId() + "/Info", true, true);
-		}else{
+		} else {
 			this.getProjectPanel().layout.setActiveItem(tab);
 		}
 
@@ -106,9 +101,21 @@ Ext.define('BASECAMP.controller.Projects', {
 
 		Ext.util.History.add('/' + records[0].get('id') + "/" + s, true, true);
 	},
-	isTabDisabled:function(tab){
-		if(this.getProjectPanel().getComponent(tab).disabled === true){
+	isTabDisabled: function (tab) {
+		if (this.getProjectPanel().getComponent(tab).disabled === true) {
 			return true;
 		}
+	},
+	createProject: function (win, values) {
+		var me = this;
+		Ext.getStore('Projects').add(values);
+		Ext.getStore('Projects').sync({
+			success: function (batch) {
+				if (batch.operations.length === 1) {
+					win.close();
+					Ext.util.History.add('/' + batch.operations[0].records[0].getId() + "/Info", true, true);
+				}
+			}
+		});
 	}
 });

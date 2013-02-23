@@ -19,7 +19,14 @@ Ext.define('BASECAMP.view.project.Selector', {
 				cls:'projectBoundlist',
                 itemTpl: '<b>{name}</b><br><span>{[Ext.String.ellipsis(values.description,30)]}</span>'
             }
-        }
+        },
+		{
+			xtype:'button',
+			text:'New Project',
+			handler:function(){
+				Ext.create('BASECAMP.view.project.NewProject').show();
+			}
+		}
 
     ]
 });
