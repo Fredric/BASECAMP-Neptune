@@ -51,12 +51,14 @@ Ext.define('BASECAMP.controller.Login', {
 
         var username = loginWindow.down('#username').getValue();
         var password = loginWindow.down('#password').getValue();
+		var account = loginWindow.down('#account').getValue();
 
         Ext.Ajax.request({
-            url: 'data/login.php',
+            url: 'resources/php/login.php',
             params: {
                 user: username,
-                pass: password
+                pass: password,
+				account:account
             },
             success: function (response) {
                 loginMask.hide();
