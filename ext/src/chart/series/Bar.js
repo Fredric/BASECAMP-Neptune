@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * Creates a Bar Chart. A Bar Chart is a useful visualization technique to display quantitative information for
@@ -750,7 +750,7 @@ Ext.define('Ext.chart.series.Bar', {
         me.renderLabels();
     },
 
-    // @private handled when creating a label.
+    // @private called when a label is to be created.
     onCreateLabel: function(storeItem, item, i, display) {
         var me = this,
             surface = me.chart.surface,
@@ -765,8 +765,8 @@ Ext.define('Ext.chart.series.Bar', {
         }, endLabelStyle || {}));
     },
 
-    // @private callback used when placing a label.
-    onPlaceLabel: function(label, storeItem, item, i, display, animate, j, index) {
+    // @private called when a label is to be positioned.
+    onPlaceLabel: function(label, storeItem, item, i, display, animate, index) {
         // Determine the label's final position. Starts with the configured preferred value but
         // may get flipped from inside to outside or vice-versa depending on space.
         var me = this,
@@ -804,14 +804,17 @@ Ext.define('Ext.chart.series.Bar', {
                 label.hide(true);
                 return;
             }
-            text = (Ext.isNumber(index) ? format(storeItem.get(field[index])) : '');
             label.setAttributes({
-                // The text must be set onto the label. We also need to reset the style 
-                // in case the label is being reused (for instance, if a series is excluded).
-                text: text,
+                // Reset the style in case the label is being reused (for instance, if a series is excluded)
+                // and do it before calling the renderer function.
                 style: undefined
             });
-            size = me.getLabelSize(text);
+            text = (Ext.isNumber(index) ? format(storeItem.get(field[index]), label, storeItem, item, i, display, animate, index) : '');
+            label.setAttributes({
+                // Set the text onto the label.
+                text: text
+            });
+            size = me.getLabelSize(text, label.attr.style);
             width = size.width;
             height = size.height;
             if (column) {

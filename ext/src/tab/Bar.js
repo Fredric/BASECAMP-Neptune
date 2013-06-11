@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * @author Ed Spencer
@@ -59,10 +59,10 @@ Ext.define('Ext.tab.Bar', {
 
     // @private
     renderTpl: [
-        '<div id="{id}-body" class="{baseCls}-body {bodyCls} {bodyTargetCls}<tpl if="ui"> {baseCls}-body-{ui}<tpl for="uiCls"> {parent.baseCls}-body-{parent.ui}-{.}</tpl></tpl>"<tpl if="bodyStyle"> style="{bodyStyle}"</tpl>>',
+        '<div id="{id}-body" class="{baseCls}-body {bodyCls} {bodyTargetCls}{childElCls}<tpl if="ui"> {baseCls}-body-{ui}<tpl for="uiCls"> {parent.baseCls}-body-{parent.ui}-{.}</tpl></tpl>"<tpl if="bodyStyle"> style="{bodyStyle}"</tpl>>',
             '{%this.renderContainer(out,values)%}',
         '</div>',
-        '<div id="{id}-strip" class="{baseCls}-strip {baseCls}-strip-{dock}',
+        '<div id="{id}-strip" class="{baseCls}-strip {baseCls}-strip-{dock}{childElCls}',
             '<tpl if="ui"> {baseCls}-strip-{ui}',
                 '<tpl for="uiCls"> {parent.baseCls}-strip-{parent.ui}-{.}</tpl>',
             '</tpl>">',
@@ -137,6 +137,19 @@ Ext.define('Ext.tab.Bar', {
         }
     },
 
+    afterRender: function() {
+        var layout = this.layout;
+
+        this.callParent();
+        if (Ext.isIE9 && Ext.isStrict && this.orientation === 'vertical') {
+            // EXTJSIV-8765: focusing a vertically-oriented tab in IE9 strict can cause
+            // the innerCt to scroll if the tabs have bordering.  
+            layout.innerCt.on('scroll', function() {
+                layout.innerCt.dom.scrollLeft = 0;
+            });
+        }
+    },
+
     afterLayout: function() {
         this.adjustTabPositions();
         this.callParent(arguments);
@@ -158,14 +171,18 @@ Ext.define('Ext.tab.Bar', {
                 // tabs need to be shifted to the right by their width
                 while (i--) {
                     tab = items[i];
-                    tab.el.setStyle('left', tab.lastBox.width + 'px');
+                    if (tab.isVisible()) {
+                        tab.el.setStyle('left', tab.lastBox.width + 'px');
+                    }
                 }
             } else if (this.dock === 'left') {
                 // rotated 270 degrees around using the top left corner as the axis.
                 // tabs need to be shifted down by their height
                 while (i--) {
                     tab = items[i];
-                    tab.el.setStyle('left', -tab.lastBox.height + 'px');
+                    if (tab.isVisible()) {
+                        tab.el.setStyle('left', -tab.lastBox.height + 'px');
+                    }
                 }
             }
         }
@@ -435,8 +452,9 @@ Ext.define('Ext.tab.Bar', {
      * @private
      * Marks the given tab as active
      * @param {Ext.tab.Tab} tab The tab to mark active
+     * @param {Boolean} initial True if we're setting the tab during setup
      */
-    setActiveTab: function(tab) {
+    setActiveTab: function(tab, initial) {
         var me = this;
 
         if (!tab.disabled && tab !== me.activeTab) {
@@ -451,11 +469,15 @@ Ext.define('Ext.tab.Bar', {
             tab.activate();
 
             me.activeTab = tab;
-            me.fireEvent('change', me, tab, tab.card);
-
-            // Ensure that after the currently in progress layout, the active tab is scrolled into view
             me.needsScroll = true;
-            me.updateLayout();
+            
+            // We don't fire the change event when setting the first tab.
+            // Also no need to run a layout
+            if (!initial) {
+                me.fireEvent('change', me, tab, tab.card);
+                // Ensure that after the currently in progress layout, the active tab is scrolled into view
+                me.updateLayout();
+            }
         }
     }
 });

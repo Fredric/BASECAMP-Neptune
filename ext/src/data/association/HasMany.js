@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * @author Ed Spencer
@@ -40,7 +40,7 @@ Ext.define('User', {
     // we can use the hasMany shortcut on the model to create a hasMany association
     hasMany: {model: 'Product', name: 'products'}
 });
-</pre></code>
+</code></pre>
 * 
  * <p>Above we created Product and User models, and linked them by saying that a User hasMany Products. This gives
  * us a new function on every User instance, in this case the function is called 'products' because that is the name
@@ -260,7 +260,8 @@ associations: [{
                     model        : associatedModel,
                     filters      : [filter],
                     remoteFilter : false,
-                    modelDefaults: modelDefaults
+                    modelDefaults: modelDefaults,
+                    disableMetaChangeEvent: true
                 });
                 
                 me[storeName] = Ext.data.AbstractStore.create(config);

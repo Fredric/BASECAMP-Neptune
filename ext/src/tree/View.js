@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * Used as a view by {@link Ext.tree.Panel TreePanel}.
@@ -85,6 +85,8 @@ Ext.define('Ext.tree.View', {
         '{%',
             'this.processRowValues(values);',
             'this.nextTpl.applyOut(values, out, parent);',
+            'delete values.rowAttr["data-qtip"];',
+            'delete values.rowAttr["data-qtitle"];',
         '%}', {
             priority: 10,
             processRowValues: function(rowValues) {
@@ -312,7 +314,7 @@ Ext.define('Ext.tree.View', {
                 '<td colspan="' + me.panel.headerCt.getColumnCount() + '">',
                     '<div class="' + me.nodeAnimWrapCls + '">',
                         // Table has to have correct classes to get sized by the dynamic CSS rules
-                        '<table class="' + Ext.baseCSSPrefix + me.id + '-table ' + Ext.baseCSSPrefix + 'grid-table" border="0" cellspacing="0" cellpadding="0">',
+                        '<table class="' + Ext.baseCSSPrefix + me.id + '-table ' + Ext.baseCSSPrefix + 'grid-table" style="border:0" cellspacing="0" cellpadding="0">',
                         columnSizer.join(''),
                         '<tbody></tbody></table>',
                     '</div>',
@@ -420,22 +422,6 @@ Ext.define('Ext.tree.View', {
         // because the targetEl just got higher.
         if (animWrap.isAnimating) {
             me.onExpand(parent);
-        }
-    },
-
-    // These methods are triggered by:
-    //  the TreeStore's beforebulkremove & bulkremovecomplete events.
-    // In the case of a fully loaded tree (no async IO needed), the whole expansion will be bracketed by
-    // layout suspension, and will end with one refreshSize call.
-    beginBulkUpdate: function() {
-        if (this.rendered) {
-            Ext.suspendLayouts();
-        }
-    },
-    endBulkUpdate: function(){
-        if (this.rendered) {
-            this.refreshSize();
-            Ext.resumeLayouts(true);
         }
     },
 
@@ -577,26 +563,34 @@ Ext.define('Ext.tree.View', {
     },
 
     // Triggered by the NodeStore's onNodeCollapse event.
-    onBeforeCollapse: function(parent, records, index) {
+    onBeforeCollapse: function(parent, records, index, callback, scope) {
         var me = this,
             animWrap;
 
-        if (me.rendered && me.all.getCount() && me.animate) {
-            // Only process if the collapsing node is in the UI.
-            // A node may be collapsed as part of a recursive ancestor collapse, and if it
-            // has already been removed from the UI by virtue of an ancestor being collapsed, we should not do anything.
-            if (Ext.Array.contains(parent.stores, me.store)) {
-                animWrap = me.getAnimWrap(parent);
-                if (!animWrap) {
-                    animWrap = me.animWraps[parent.internalId] = me.createAnimWrap(parent, index);
+        if (me.rendered && me.all.getCount()) {
+            if (me.animate) {
+                // Only process if the collapsing node is in the UI.
+                // A node may be collapsed as part of a recursive ancestor collapse, and if it
+                // has already been removed from the UI by virtue of an ancestor being collapsed, we should not do anything.
+                if (Ext.Array.contains(parent.stores, me.store)) {
+                    animWrap = me.getAnimWrap(parent);
+                    if (!animWrap) {
+                        animWrap = me.animWraps[parent.internalId] = me.createAnimWrap(parent, index);
+                    }
+                    else if (animWrap.expanding) {
+                        // If we collapse this node while it is still expanding then we
+                        // have to remove the nodes from the animWrap.
+                        animWrap.targetEl.select(this.itemSelector).remove();
+                    }
+                    animWrap.expanding = false;
+                    animWrap.collapsing = true;
+                    animWrap.callback = callback;
+                    animWrap.scope = scope;
                 }
-                else if (animWrap.expanding) {
-                    // If we collapse this node while it is still expanding then we
-                    // have to remove the nodes from the animWrap.
-                    animWrap.targetEl.select(this.itemSelector).remove();
-                }
-                animWrap.expanding = false;
-                animWrap.collapsing = true;
+            } else {
+                // Cache any passed callback for use in the onCollapse post collapse handler non-animated codepath
+                me.onCollapseCallback = callback;
+                me.onCollapseScope = scope;
             }
         }
     },
@@ -622,6 +616,10 @@ Ext.define('Ext.tree.View', {
             parent.isExpandingOrCollapsing = false;
             me.fireEvent('afteritemcollapse', parent, index, node);
             me.refreshSize();
+
+            // Call any collapse callback cached in the onBeforeCollapse handler
+            Ext.callback(me.onCollapseCallback, me.onCollapseScope);
+            me.onCollapseCallback = me.onCollapseScope = null;
             return;
         }
 
@@ -647,6 +645,10 @@ Ext.define('Ext.tree.View', {
             callback: function() {
                 parent.isExpandingOrCollapsing = false;
                 me.fireEvent('afteritemcollapse', parent, index, node);
+
+                // Call any collapse callback cached in the onBeforeCollapse handler
+                Ext.callback(animWrap.callback, animWrap.scope);
+                animWrap.callback = animWrap.scope = null;
             }
         });
         animWrap.isAnimating = true;
@@ -673,14 +675,22 @@ Ext.define('Ext.tree.View', {
      */
     expand: function(record, deep, callback, scope) {
         var me = this,
-            doAnimate = !!me.animate;
+            doAnimate = !!me.animate,
+            result;
 
         // Block toggling if we are already animating an expand or collapse operation.
         if (!doAnimate || !record.isExpandingOrCollapsing) {
             if (!record.isLeaf()) {
                 record.isExpandingOrCollapsing = doAnimate;
             }
-            return record.expand(deep, callback, scope);
+
+            // Need to suspend layouts because the expand process makes multiple changes to the UI
+            // in addition to inserting new nodes. Folder and elbow images have to change, so we
+            // need to coalesce all resulting layouts.
+            Ext.suspendLayouts();
+            result = record.expand(deep, callback, scope);
+            Ext.resumeLayouts(true);
+            return result;
         }
     },
 
@@ -779,9 +789,7 @@ Ext.define('Ext.tree.View', {
         me.mon(treeStore, {
             scope: me,
             beforefill: me.onBeforeFill,
-            fillcomplete: me.onFillComplete,
-            beforebulkremove: me.beginBulkUpdate,
-            bulkremovecomplete: me.endBulkUpdate
+            fillcomplete: me.onFillComplete
         });
 
         if (!treeStore.remoteSort) {
@@ -804,9 +812,7 @@ Ext.define('Ext.tree.View', {
         me.mun(treeStore, {
             scope: me,
             beforefill: me.onBeforeFill,
-            fillcomplete: me.onFillComplete,
-            beforebulkremove: me.beginBulkUpdate,
-            bulkremovecomplete: me.endBulkUpdate
+            fillcomplete: me.onFillComplete
         });
 
         if (!treeStore.remoteSort) {

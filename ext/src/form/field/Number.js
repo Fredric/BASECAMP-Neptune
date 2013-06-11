@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * @docauthor Jason Johnston <jason@sencha.com>
@@ -117,9 +117,15 @@ Ext.define('Ext.form.field.Number', {
      * @cfg {RegExp} maskRe
      * @private
      */
+     
+    /**
+     * @cfg {Boolean} [allowExponential=true]
+     * Set to `false` to disallow Exponential number notation
+     */
+    allowExponential: true,
 
     /**
-     * @cfg {Boolean} allowDecimals
+     * @cfg {Boolean} [allowDecimals=true]
      * False to disallow decimal values
      */
     allowDecimals : true,
@@ -338,12 +344,19 @@ Ext.define('Ext.form.field.Number', {
         // Build regexes for masking and stripping based on the configured options
         if (me.disableKeyFilter !== true) {
             allowed = me.baseChars + '';
-            if (me.allowDecimals) {
-                allowed += me.decimalSeparator;
+            
+            if (me.allowExponential) {
+                allowed += me.decimalSeparator + 'e+-';
             }
-            if (me.minValue < 0) {
-                allowed += '-';
+            else {
+                if (me.allowDecimals) {
+                    allowed += me.decimalSeparator;
+                }
+                if (me.minValue < 0) {
+                    allowed += '-';
+                }
             }
+            
             allowed = Ext.String.escapeRegex(allowed);
             me.maskRe = new RegExp('[' + allowed + ']');
             if (me.autoStripChars) {

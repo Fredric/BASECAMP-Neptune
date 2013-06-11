@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * A mixin to add floating capability to a Component.
@@ -46,6 +46,16 @@ Ext.define('Ext.util.Floating', {
     constrain: false,
 
     /**
+     * @cfg {Boolean} [fixed=false]
+     * Configure as `true` to have this Component fixed at its `X, Y` coordinates in the browser viewport, immune
+     * to scrolling the document.
+     * 
+     * *Only in browsers that support `position:fixed`*
+     * 
+     * *IE6 and IE7, 8 and 9 quirks do not support `position: fixed`*
+     */
+
+    /**
      * @cfg {Number} shadowOffset
      * Number of pixels to offset the shadow.
      */
@@ -53,12 +63,17 @@ Ext.define('Ext.util.Floating', {
     constructor: function (dom) {
         var me = this;
 
-        me.el = new Ext.Layer(Ext.apply({
+        // We do not support fixed on legacy browsers.
+        me.fixed = me.fixed && !(Ext.isIE6 || Ext.isIEQuirks);
+
+        me.el = new Ext.dom.Layer(Ext.apply({
+            preventSync  : true,
             hideMode     : me.hideMode,
             hidden       : me.hidden,
             shadow       : (typeof me.shadow != 'undefined') ? me.shadow : 'sides',
             shadowOffset : me.shadowOffset,
             constrain    : false,
+            fixed        : me.fixed,
             shim         : (me.shim === false) ? false : undefined
         }, me.floating), dom);
 
@@ -165,7 +180,13 @@ Ext.define('Ext.util.Floating', {
     // @private
     // Mousedown brings to front, and programatically grabs focus *unless the mousedown was on a focusable element*
     onMouseDown: function (e) {
-        if (this.floating) {
+        var focusTask = this.focusTask;
+        
+        if (this.floating &&
+            // get out of here if there is already a pending focus.  This usually means
+            // that the handler for a mousedown on a child element set the focus on some
+            // other component, and we so not want to steal it back. See EXTJSIV-9458
+            (!focusTask || !focusTask.id)) {
             // If what was mousedowned upon is going to claim focus anyway, pass preventFocus as true.
             this.toFront(!!e.getTarget(':focusable'));
         }
@@ -183,7 +204,19 @@ Ext.define('Ext.util.Floating', {
         }
     },
     
+    // @private
+    syncShadow : function() {
+        if (this.floating) {
+            this.el.sync(true);
+        }
+    },
+    
+    onBeforeFloatLayout: function(){
+        this.el.preventSync = true;
+    },
+    
     onAfterFloatLayout: function(){
+        delete this.el.preventSync;
         this.syncShadow();   
     },
 
@@ -362,13 +395,6 @@ Ext.define('Ext.util.Floating', {
             this.center();    
         }
         delete this.needsCenter;
-    },
-
-    // @private
-    syncShadow : function() {
-        if (this.floating) {
-            this.el.sync(true);
-        }
     },
 
     // @private

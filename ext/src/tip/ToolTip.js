@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * ToolTip is a {@link Ext.tip.Tip} implementation that handles the common case of displaying a
@@ -465,12 +465,13 @@ Ext.define('Ext.tip.ToolTip', {
     // @private
     onTargetOver: function(e) {
         var me = this,
+            delegate = me.delegate,
             t;
 
         if (me.disabled || e.within(me.target.dom, true)) {
             return;
         }
-        t = e.getTarget(me.delegate);
+        t = delegate ? e.getTarget(delegate) : true;
         if (t) {
             me.triggerElement = t;
             me.triggerEvent = e;
@@ -509,14 +510,21 @@ Ext.define('Ext.tip.ToolTip', {
 
     // @private
     onTargetOut: function(e) {
-        var me = this;
+        var me = this,
+            triggerEl = me.triggerElement,
+            // If we don't have a delegate, then the target is set
+            // to true, so set it to the main target.
+            target = triggerEl === true ? me.target : triggerEl;
 
         // If disabled, moving within the current target, ignore the mouseout
         // EventObject.within is the only correct way to determine this.
-        if (me.disabled || e.within(me.target.dom, true)) {
+        if (me.disabled || !triggerEl || e.within(target, true)) {
             return;
         }
-        me.clearTimer('show');
+        if (me.showTimer) {
+            me.clearTimer('show');
+            me.triggerElement = null;
+        }
         if (me.autoHide !== false) {
             me.delayHide();
         }
@@ -649,11 +657,18 @@ Ext.define('Ext.tip.ToolTip', {
         }
     },
 
+    _timerNames: {},
     // @private
-    clearTimer: function(name) {
-        name = name + 'Timer';
-        clearTimeout(this[name]);
-        delete this[name];
+    clearTimer: function (name) {
+        var me = this,
+            names = me._timerNames,
+            propName = names[name] || (names[name] = name + 'Timer'),
+            timer = me[propName];
+
+        if (timer) {
+            clearTimeout(timer);
+            me[propName] = null;
+        }
     },
 
     // @private

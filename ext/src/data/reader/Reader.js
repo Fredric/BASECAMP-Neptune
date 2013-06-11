@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * @author Ed Spencer
@@ -204,7 +204,7 @@ Ext.define('Ext.data.reader.Reader', {
     successProperty: 'success',
 
     /**
-     * @cfg {String} root
+     * @cfg {String} [root]
      * The name of the property which contains the data items corresponding to the Model(s) for which this
      * Reader is configured.  For JSON reader it's a property name (or a dot-separated list of property names
      * if the root is nested).  For XML reader it's a CSS selector.  For Array reader the root is not applicable
@@ -277,7 +277,6 @@ Ext.define('Ext.data.reader.Reader', {
         me.mixins.observable.constructor.call(me, config);
         me.fieldCount = 0;
         me.model = Ext.ModelManager.getModel(me.model);
-        me.accessExpressionFn = Ext.Function.bind(me.createFieldAccessExpression, me);
 
         // Extractors can only be calculated if the fields MixedCollection has been set.
         // A Model may only complete its setup (set the prototype properties) after asynchronous loading
@@ -431,7 +430,7 @@ Ext.define('Ext.data.reader.Reader', {
             length  = root.length,
             records = new Array(length),
             convertedValues, node, record, i;
-            
+
         if (!root.length && Ext.isObject(root)) {
             root = [root];
             length = 1;
@@ -439,10 +438,15 @@ Ext.define('Ext.data.reader.Reader', {
 
         for (i = 0; i < length; i++) {
             node = root[i];
-            if (!node.isModel) { 
+            if (node.isModel) {
+                // If we're given a model instance in the data, just push it on
+                // without doing any conversion
+                records[i] = node;
+            } else {
                 // Create a record with an empty data object.
-                // Populate that data object by extracting and converting field values from raw data
-                record = new Model(undefined, me.getId(node), node, convertedValues = {});
+                // Populate that data object by extracting and converting field values from raw data.
+                // Must pass the ID to use because we pass no data for the constructor to pluck an ID from
+                records[i] = record = new Model(undefined, me.getId(node), node, convertedValues = {});
 
                 // If the server did not include an id in the response data, the Model constructor will mark the record as phantom.
                 // We  need to set phantom to false here because records created from a server response using a reader by definition are not phantom records.
@@ -451,21 +455,15 @@ Ext.define('Ext.data.reader.Reader', {
                 // Use generated function to extract all fields at once
                 me.convertRecordData(convertedValues, node, record);
 
-                records[i] = record;
-                
                 if (me.implicitIncludes && record.associations.length) {
                     me.readAssociated(record, node);
                 }
-            } else {
-                // If we're given a model instance in the data, just push it on
-                // without doing any conversion
-                records[i] = node;
             }
         }
 
         return records;
     },
-    
+
     /**
      * @private
      * Loads a record's associations from the data object. This prepopulates hasMany and belongsTo associations
@@ -757,7 +755,10 @@ Ext.define('Ext.data.reader.Reader', {
                 fields: modelProto.fields.items
             };
 
-        me.recordDataExtractorTemplate.createFieldAccessExpression = me.accessExpressionFn;
+        me.recordDataExtractorTemplate.createFieldAccessExpression = function() { 
+            return me.createFieldAccessExpression.apply(me,arguments);
+        };
+        
         // Here we are creating a new Function and invoking it immediately in the scope of this Reader
         // It declares several vars capturing the configured context of this Reader, and returns a function
         // which, when passed a record data object, a raw data row in the format this Reader is configured to read,

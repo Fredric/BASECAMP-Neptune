@@ -5,29 +5,33 @@
  * metadata-driven class system features 
  */
 Ext.Loader.addClassPathMappings({
-  "ExtThemeNeptune": "packages/ext-theme-neptune/overrides",
+  " Ext.Msg": "ext/src/window/MessageBox.js",
+  "ExtThemeNeptune": "ext/packages/ext-theme-neptune/overrides",
   "Ext": "ext/src",
   "BASECAMP": "app",
   "Ext.rtl.EventObjectImpl": "ext/src/rtl/EventObject.js",
+  "BASECAMP.Application": "app/application.js",
   "Overrides": "lib/overrides",
   "Abstract": "lib/abstract"
 });
 Ext.ClassManager.addNameAlternateMappings({
   "ExtThemeNeptune.container.ButtonGroup": [],
-  "Ext.ux.grid.TransformGrid": [],
+  "BASECAMP.controller.Info": [],
   "Ext.ux.ajax.DataSimlet": [],
+  "Ext.ux.grid.TransformGrid": [],
   "BASECAMP.view.todolists.UI": [],
+  "BASECAMP.store.Events": [],
   "ExtThemeNeptune.toolbar.Paging": [],
-  "Ext.ux.event.Driver": [],
   "Ext.ux.ajax.XmlSimlet": [],
+  "Ext.ux.event.Driver": [],
   "Ext.ux.DataView.DragSelector": [],
   "Ext.ux.grid.menu.ListMenu": [],
   "Ext.ux.form.MultiSelect": [
     "Ext.ux.Multiselect"
   ],
   "BASECAMP.view.todolists.Window": [],
+  "ExtThemeNeptune.grid.column.RowNumberer": [],
   "BASECAMP.store.Todos": [],
-  "Ext.ux.CheckColumn": [],
   "Ext.ux.PreviewPlugin": [],
   "BASECAMP.view.documents.UI": [],
   "BASECAMP.view.documents.Grid": [],
@@ -43,7 +47,9 @@ Ext.ClassManager.addNameAlternateMappings({
   "BASECAMP.view.uploads.UI": [],
   "Ext.ux.TabReorderer": [],
   "Ext.ux.grid.filter.NumericFilter": [],
+  "ExtThemeNeptune.panel.Table": [],
   "BASECAMP.store.TodoLists": [],
+  "BASECAMP.view.Info.EventGrid": [],
   "Ext.ux.event.Recorder": [],
   "BASECAMP.model.User": [],
   "BASECAMP.view.topics.Grid": [],
@@ -52,10 +58,13 @@ Ext.ClassManager.addNameAlternateMappings({
   "Ext.ux.ajax.SimManager": [],
   "Ext.ux.grid.filter.BooleanFilter": [],
   "BASECAMP.view.topics.UI": [],
+  "BASECAMP.model.Event": [],
   "Ext.ux.TabScrollerMenu": [],
   "ExtThemeNeptune.menu.Separator": [],
   "Ext.ux.IFrame": [],
+  "BASECAMP.Application": [],
   "Ext.ux.form.SearchField": [],
+  "Ext.ux.dd.CellFieldDropZone": [],
   "Ext.ux.LiveSearchGridPanel": [],
   "Ext.ux.grid.filter.DateFilter": [],
   "Ext.ux.TreePicker": [],
@@ -65,21 +74,22 @@ Ext.ClassManager.addNameAlternateMappings({
     "Ext.data.PagingMemoryProxy"
   ],
   "BASECAMP.model.Project": [],
-  "Ext.ux.BoxReorderer": [],
-  "ExtThemeNeptune.menu.Menu": [],
   "BASECAMP.model.Topic": [],
+  "ExtThemeNeptune.menu.Menu": [],
+  "Ext.ux.BoxReorderer": [],
   "BASECAMP.model.Todo": [],
   "Ext.ux.grid.filter.Filter": [],
   "BASECAMP.view.Viewport": [],
   "Ext.ux.GroupTabRenderer": [],
-  "BASECAMP.controller.Projects": [],
   "BASECAMP.view.topics.Window": [],
+  "BASECAMP.controller.Projects": [],
   "BASECAMP.controller.Documents": [],
   "Ext.ux.FieldReplicator": [],
-  "Ext.ux.grid.filter.ListFilter": [],
   "ExtThemeNeptune.panel.Panel": [],
+  "Ext.ux.grid.filter.ListFilter": [],
   "BASECAMP.model.Name": [],
   "BASECAMP.model.TodoList": [],
+  "Ext.ux.dd.PanelFieldDragZone": [],
   "ExtThemeNeptune.toolbar.Toolbar": [],
   "ExtThemeNeptune.tab.Tab": [],
   "Ext.ux.GMapPanel": [],
@@ -94,16 +104,18 @@ Ext.ClassManager.addNameAlternateMappings({
   "BASECAMP.view.todolists.Grid": [],
   "Ext.ux.DataView.Animated": [],
   "ExtThemeNeptune.resizer.Splitter": [],
+  "BASECAMP.view.project.NewProject": [],
+  "BASECAMP.store.Topics": [],
   "Ext.ux.statusbar.StatusBar": [
     "Ext.ux.StatusBar"
   ],
-  "BASECAMP.store.Topics": [],
+  "ExtThemeNeptune.layout.component.Dock": [],
   "Ext.ux.grid.menu.RangeMenu": [],
   "Ext.ux.RowExpander": [],
   "BASECAMP.view.project.Selector": [],
   "Ext.ux.event.Player": [],
-  "BASECAMP.controller.Login": [],
   "BASECAMP.view.todos.Grid": [],
+  "BASECAMP.controller.Login": [],
   "BASECAMP.controller.Navigation": [],
   "BASECAMP.view.Login": [],
   "ExtThemeNeptune.panel.Tool": [],
@@ -115,6 +127,7 @@ Ext.ClassManager.addNameAlternateMappings({
   "BASECAMP.controller.Main": [],
   "BASECAMP.model.Document": [],
   "BASECAMP.store.Documents": [],
+  "BASECAMP.view.Info.UI": [],
   "Ext.ux.DataTip": [],
   "Ext.ux.grid.filter.DateTimeFilter": [],
   "Ext.ux.form.ItemSelector": [
@@ -124,20 +137,23 @@ Ext.ClassManager.addNameAlternateMappings({
   "Ext.ux.Spotlight": [],
   "ExtThemeNeptune.form.field.HtmlEditor": [],
   "Ext.ux.grid.FiltersFeature": [],
+  "ExtThemeNeptune.Component": [],
   "BASECAMP.controller.Topics": []
 });
 Ext.ClassManager.addNameAliasMappings({
   "ExtThemeNeptune.container.ButtonGroup": [],
-  "Ext.ux.grid.TransformGrid": [],
+  "BASECAMP.controller.Info": [],
   "Ext.ux.ajax.DataSimlet": [],
+  "Ext.ux.grid.TransformGrid": [],
   "BASECAMP.view.todolists.UI": [
     "widget.todolists"
   ],
+  "BASECAMP.store.Events": [],
   "ExtThemeNeptune.toolbar.Paging": [],
-  "Ext.ux.event.Driver": [],
   "Ext.ux.ajax.XmlSimlet": [
     "simlet.xml"
   ],
+  "Ext.ux.event.Driver": [],
   "Ext.ux.DataView.DragSelector": [],
   "Ext.ux.grid.menu.ListMenu": [],
   "Ext.ux.form.MultiSelect": [
@@ -147,10 +163,8 @@ Ext.ClassManager.addNameAliasMappings({
   "BASECAMP.view.todolists.Window": [
     "widget.todolistmodal"
   ],
+  "ExtThemeNeptune.grid.column.RowNumberer": [],
   "BASECAMP.store.Todos": [],
-  "Ext.ux.CheckColumn": [
-    "widget.checkcolumn"
-  ],
   "Ext.ux.PreviewPlugin": [
     "plugin.preview"
   ],
@@ -184,7 +198,11 @@ Ext.ClassManager.addNameAliasMappings({
   "Ext.ux.grid.filter.NumericFilter": [
     "gridfilter.numeric"
   ],
+  "ExtThemeNeptune.panel.Table": [],
   "BASECAMP.store.TodoLists": [],
+  "BASECAMP.view.Info.EventGrid": [
+    "widget.eventgrid"
+  ],
   "Ext.ux.event.Recorder": [],
   "BASECAMP.model.User": [],
   "BASECAMP.view.topics.Grid": [
@@ -199,6 +217,7 @@ Ext.ClassManager.addNameAliasMappings({
   "BASECAMP.view.topics.UI": [
     "widget.topics"
   ],
+  "BASECAMP.model.Event": [],
   "Ext.ux.TabScrollerMenu": [
     "plugin.tabscrollermenu"
   ],
@@ -206,9 +225,11 @@ Ext.ClassManager.addNameAliasMappings({
   "Ext.ux.IFrame": [
     "widget.uxiframe"
   ],
+  "BASECAMP.Application": [],
   "Ext.ux.form.SearchField": [
     "widget.searchfield"
   ],
+  "Ext.ux.dd.CellFieldDropZone": [],
   "Ext.ux.LiveSearchGridPanel": [],
   "Ext.ux.grid.filter.DateFilter": [
     "gridfilter.date"
@@ -222,27 +243,28 @@ Ext.ClassManager.addNameAliasMappings({
     "proxy.pagingmemory"
   ],
   "BASECAMP.model.Project": [],
-  "Ext.ux.BoxReorderer": [],
-  "ExtThemeNeptune.menu.Menu": [],
   "BASECAMP.model.Topic": [],
+  "ExtThemeNeptune.menu.Menu": [],
+  "Ext.ux.BoxReorderer": [],
   "BASECAMP.model.Todo": [],
   "Ext.ux.grid.filter.Filter": [],
   "BASECAMP.view.Viewport": [],
   "Ext.ux.GroupTabRenderer": [
     "plugin.grouptabrenderer"
   ],
-  "BASECAMP.controller.Projects": [],
   "BASECAMP.view.topics.Window": [
     "widget.topicsmodal"
   ],
+  "BASECAMP.controller.Projects": [],
   "BASECAMP.controller.Documents": [],
   "Ext.ux.FieldReplicator": [],
+  "ExtThemeNeptune.panel.Panel": [],
   "Ext.ux.grid.filter.ListFilter": [
     "gridfilter.list"
   ],
-  "ExtThemeNeptune.panel.Panel": [],
   "BASECAMP.model.Name": [],
   "BASECAMP.model.TodoList": [],
+  "Ext.ux.dd.PanelFieldDragZone": [],
   "ExtThemeNeptune.toolbar.Toolbar": [],
   "ExtThemeNeptune.tab.Tab": [],
   "Ext.ux.GMapPanel": [
@@ -269,20 +291,24 @@ Ext.ClassManager.addNameAliasMappings({
   ],
   "Ext.ux.DataView.Animated": [],
   "ExtThemeNeptune.resizer.Splitter": [],
+  "BASECAMP.view.project.NewProject": [
+    "widget.addprojectwindow"
+  ],
+  "BASECAMP.store.Topics": [],
   "Ext.ux.statusbar.StatusBar": [
     "widget.statusbar"
   ],
-  "BASECAMP.store.Topics": [],
+  "ExtThemeNeptune.layout.component.Dock": [],
   "Ext.ux.grid.menu.RangeMenu": [],
   "Ext.ux.RowExpander": [],
   "BASECAMP.view.project.Selector": [
     "widget.projectselector"
   ],
   "Ext.ux.event.Player": [],
-  "BASECAMP.controller.Login": [],
   "BASECAMP.view.todos.Grid": [
     "widget.todogrid"
   ],
+  "BASECAMP.controller.Login": [],
   "BASECAMP.controller.Navigation": [],
   "BASECAMP.view.Login": [
     "widget.login"
@@ -298,6 +324,9 @@ Ext.ClassManager.addNameAliasMappings({
   "BASECAMP.controller.Main": [],
   "BASECAMP.model.Document": [],
   "BASECAMP.store.Documents": [],
+  "BASECAMP.view.Info.UI": [
+    "widget.info"
+  ],
   "Ext.ux.DataTip": [
     "plugin.datatip"
   ],
@@ -316,5 +345,22 @@ Ext.ClassManager.addNameAliasMappings({
   "Ext.ux.grid.FiltersFeature": [
     "feature.filters"
   ],
+  "ExtThemeNeptune.Component": [],
   "BASECAMP.controller.Topics": []
 });
+Ext.Loader.loadScript("ext/packages/ext-theme-neptune/overrides/Component.js");
+Ext.Loader.loadScript("ext/packages/ext-theme-neptune/overrides/panel/Panel.js");
+Ext.Loader.loadScript("ext/packages/ext-theme-neptune/overrides/layout/component/Dock.js");
+Ext.Loader.loadScript("ext/packages/ext-theme-neptune/overrides/toolbar/Toolbar.js");
+Ext.Loader.loadScript("ext/packages/ext-theme-neptune/overrides/container/ButtonGroup.js");
+Ext.Loader.loadScript("ext/packages/ext-theme-neptune/overrides/toolbar/Paging.js");
+Ext.Loader.loadScript("ext/packages/ext-theme-neptune/overrides/picker/Month.js");
+Ext.Loader.loadScript("ext/packages/ext-theme-neptune/overrides/form/field/HtmlEditor.js");
+Ext.Loader.loadScript("ext/packages/ext-theme-neptune/overrides/panel/Table.js");
+Ext.Loader.loadScript("ext/packages/ext-theme-neptune/overrides/grid/RowEditor.js");
+Ext.Loader.loadScript("ext/packages/ext-theme-neptune/overrides/grid/column/RowNumberer.js");
+Ext.Loader.loadScript("ext/packages/ext-theme-neptune/overrides/resizer/Splitter.js");
+Ext.Loader.loadScript("ext/packages/ext-theme-neptune/overrides/menu/Menu.js");
+Ext.Loader.loadScript("ext/packages/ext-theme-neptune/overrides/menu/Separator.js");
+Ext.Loader.loadScript("ext/packages/ext-theme-neptune/overrides/panel/Tool.js");
+Ext.Loader.loadScript("ext/packages/ext-theme-neptune/overrides/tab/Tab.js");

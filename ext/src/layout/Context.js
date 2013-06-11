@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * Manages context information during a layout.
@@ -445,7 +445,7 @@ Ext.define('Ext.layout.Context', {
             collection = this.triggers[inDom ? 'dom' : 'data'],
             triggers = collection && collection[id],
             length = (triggers && triggers.length) || 0,
-            collection, i, item, trigger;
+            i, item, trigger;
 
         for (i = 0; i < length; ++i) {
             trigger = triggers[i];
@@ -594,9 +594,6 @@ Ext.define('Ext.layout.Context', {
             layout, key;
 
         Ext.failedLayouts = (Ext.failedLayouts || 0) + 1;
-        //<debug>
-        Ext.log('Layout run failed');
-        //</debug>
 
         for (key in layouts) {
             layout = layouts[key];
@@ -606,6 +603,14 @@ Ext.define('Ext.layout.Context', {
                 layout.ownerContext = null;
             }
         }
+
+        //<debug>
+        if (Ext.repoDevMode && !this.pageAnalyzerMode) {
+            Ext.Error.raise('Layout run failed');
+        } else {
+            Ext.log.error('Layout run failed');
+        }
+        //</debug>
     },
 
     /**
@@ -616,7 +621,6 @@ Ext.define('Ext.layout.Context', {
      * that new components will be introduced to the layout.
      * 
      * @param {Ext.Component/Array} components An array of Components or a single Component.
-     * @param {Ext.layout.ContextItem} ownerCtContext The ownerCt's ContextItem.
      * @param {Boolean} full True if all properties should be invalidated, otherwise only
      *  those calculated by the component should be invalidated.
      */
@@ -1164,7 +1168,7 @@ Ext.define('Ext.layout.Context', {
 
     /**
      * Set the size of a component, element or composite or an array of components or elements.
-     * @param {Ext.Component/Ext.Component[]/Ext.dom.Element/Ext.dom.Element[]/Ext.dom.CompositeElement}
+     * @param {Ext.Component/Ext.Component[]/Ext.dom.Element/Ext.dom.Element[]/Ext.dom.CompositeElement} items
      * The item(s) to size.
      * @param {Number} width The new width to set (ignored if undefined or NaN).
      * @param {Number} height The new height to set (ignored if undefined or NaN).

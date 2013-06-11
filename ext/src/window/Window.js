@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * A specialized panel intended for use as an application window. Windows are floated, {@link #resizable}, and
@@ -150,12 +150,17 @@ Ext.define('Ext.window.Window', {
     constrain: false,
 
     /**
+     * @override
      * @cfg {Boolean} constrainHeader
      * True to constrain the window header within its containing element (allowing the window body to fall outside of
      * its containing element) or false to allow the header to fall outside its containing element.
      * Optionally the entire window can be constrained using {@link #constrain}.
      */
     constrainHeader: false,
+
+    /**
+     * @cfg simpleDrag @hide
+     */
 
     /**
      * @cfg {Boolean} plain
@@ -239,8 +244,6 @@ Ext.define('Ext.window.Window', {
      * @readonly
      */
     floating: true,
-
-    ariaRole: 'alertdialog',
 
     itemCls: Ext.baseCSSPrefix + 'window-item',
     
@@ -426,55 +429,22 @@ Ext.define('Ext.window.Window', {
         }
     },
 
-    /**
-     * @private
-     * Override Component.initDraggable.
-     * Window uses the header element as the delegate.
-     */
+    // Override. Windows are always simple draggable, they do not use Ext.Panel.DDs
+    // The dd property in a Window is always a ComponentDragger
     initDraggable: function() {
-        var me = this,
-            ddConfig, dd;
-
-        if (!me.header) {
-            me.updateHeader(true);
-        }
-
-        /*
-         * Check the header here again. If for whatever reason it wasn't created in
-         * updateHeader (we were configured with header: false) then we'll just ignore the rest since the
-         * header acts as the drag handle.
+        /**
+         * @property {Ext.util.ComponentDragger} dd
+         * If this Window is configured {@link #cfg-draggable}, this property will contain an instance of
+         * {@link Ext.util.ComponentDragger} (A subclass of {@link Ext.dd.DragTracker DragTracker}) which handles dragging
+         * the Window's DOM Element, and constraining according to the {@link #constrain} and {@link #constrainHeader} .
+         *
+         * This has implementations of `onBeforeStart`, `onDrag` and `onEnd` which perform the dragging action. If
+         * extra logic is needed at these points, use {@link Ext.Function#createInterceptor createInterceptor} or
+         * {@link Ext.Function#createSequence createSequence} to augment the existing implementations.
          */
-        if (me.header) {
-            ddConfig = Ext.applyIf({
-                el: me.el,
-                delegate: '#' + Ext.escapeId(me.header.id)
-            }, me.draggable);
-
-            // Add extra configs if Window is specified to be constrained
-            if (me.constrain || me.constrainHeader) {
-                ddConfig.constrain = me.constrain;
-                ddConfig.constrainDelegate = me.constrainHeader;
-                ddConfig.constrainTo = me.constrainTo || me.container;
-            }
-
-            /**
-             * @property {Ext.util.ComponentDragger} dd
-             * If this Window is configured {@link #cfg-draggable}, this property will contain an instance of
-             * {@link Ext.util.ComponentDragger} (A subclass of {@link Ext.dd.DragTracker DragTracker}) which handles dragging
-             * the Window's DOM Element, and constraining according to the {@link #constrain} and {@link #constrainHeader} .
-             *
-             * This has implementations of `onBeforeStart`, `onDrag` and `onEnd` which perform the dragging action. If
-             * extra logic is needed at these points, use {@link Ext.Function#createInterceptor createInterceptor} or
-             * {@link Ext.Function#createSequence createSequence} to augment the existing implementations.
-             */
-            dd = me.dd = new Ext.util.ComponentDragger(this, ddConfig);
-            me.relayEvents(dd, ['dragstart', 'drag', 'dragend']);
-            if (me.maximized) {
-                dd.disable();
-            }
-        }
+        this.initSimpleDraggable();
     },
-    
+
     initResizable: function(){
         this.callParent(arguments);
         if (this.maximized) {
@@ -595,15 +565,6 @@ Ext.define('Ext.window.Window', {
             me.callParent(arguments);
         } else {
             focusDescendant.focus();
-        }
-    },
-
-    beforeLayout: function () {
-        var shadow = this.el.shadow;
-
-        this.callParent();
-        if (shadow) {
-            shadow.hide();
         }
     },
 
@@ -744,20 +705,25 @@ Ext.define('Ext.window.Window', {
                 me.restoreSize = me.getSize();
                 me.restorePos = me.getPosition(true);
             }
-            
-            header.suspendLayouts();
-            if (me.maximizable) {
-                tools.maximize.hide();
-                tools.restore.show();
-                changed = true;
+
+            // Manipulate visibility of header tools if there is a header
+            if (header) {
+                header.suspendLayouts();
+                if (tools.maximize) {
+                    tools.maximize.hide();
+                    changed = true;
+                }
+                if (tools.restore) {
+                    tools.restore.show();
+                    changed = true;
+                }
+                if (me.collapseTool) {
+                    me.collapseTool.hide();
+                    changed = true;
+                }
+                me.resumeHeaderLayout(changed);
             }
-            
-            if (me.collapseTool) {
-                me.collapseTool.hide();
-                changed = true;
-            }
-            this.resumeHeaderLayout(changed);
-            
+
             me.maximized = true;
             me.el.disableShadow();
 
@@ -800,23 +766,26 @@ Ext.define('Ext.window.Window', {
             changed;
 
         if (me.maximized) {
-            delete me.hasSavedRestore;
+            me.hasSavedRestore = null;
             me.removeCls(Ext.baseCSSPrefix + 'window-maximized');
 
-            header.suspendLayouts();
-            if (tools.restore) {
-                tools.restore.hide();
-                changed = true;
+            // Manipulate visibility of header tools if there is a header
+            if (header) {
+                header.suspendLayouts();
+                if (tools.restore) {
+                    tools.restore.hide();
+                    changed = true;
+                }
+                if (tools.maximize) {
+                    tools.maximize.show();
+                    changed = true;
+                }
+                if (me.collapseTool) {
+                    me.collapseTool.show();
+                    changed = true;
+                }
+                me.resumeHeaderLayout(changed);
             }
-            if (tools.maximize) {
-                tools.maximize.show();
-                changed = true;
-            }
-            if (me.collapseTool) {
-                me.collapseTool.show();
-                changed = true;
-            }
-            this.resumeHeaderLayout(changed);
 
             me.maximized = false;
 
@@ -826,13 +795,12 @@ Ext.define('Ext.window.Window', {
             me.setBox(newBox, animate = (animate || !!me.animateTarget) ? {
                 callback: function() {
                     me.el.enableShadow(true);
-                    me.fireEvent('maximize', me);
+                    me.fireEvent('restore', me);
                 }
             } : null);
 
             // Unset old position/sizing
-            delete me.restorePos;
-            delete me.restoreSize;
+            me.restorePos = me.restoreSize = null;
 
             // Allow users to drag and drop again
             if (me.dd) {

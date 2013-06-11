@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * Simple class that can provide a shadow effect for any element.  Note that the element
@@ -149,9 +149,9 @@ Ext.define('Ext.Shadow', {
      * @cfg {String} mode
      * The shadow display mode.  Supports the following options:
      *
-     * - sides : Shadow displays on both sides and bottom only</li>
-     * - frame : Shadow displays equally on all four sides</li>
-     * - drop : Traditional bottom-right drop shadow</li>
+     * - sides : Shadow displays on both sides and bottom only
+     * - frame : Shadow displays equally on all four sides
+     * - drop : Traditional bottom-right drop shadow
      */
 
     /**
@@ -189,20 +189,30 @@ Ext.define('Ext.Shadow', {
     show: function(target) {
         var me = this,
             index, xy;
-        
+
         target = Ext.get(target);
+        
+        // DOM reads first...
+        index = (parseInt(target.getStyle("z-index"), 10) - 1) || 0;
+        xy = target[me.localXYNames.get]();
+
+        // DOM writes...
         if (!me.el) {
             me.el = Ext.ShadowPool.pull();
+            // Shadow elements are shared, so fix position to match current owner
+            if (me.fixed) {
+                me.el.dom.style.position = 'fixed';
+            } else {
+                me.el.dom.style.position = '';
+            }
             if (me.el.dom.nextSibling != target.dom) {
                 me.el.insertBefore(target);
             }
         }
-        index = (parseInt(target.getStyle("z-index"), 10) - 1) || 0;
         me.el.setStyle("z-index", me.zIndex || index);
         if (Ext.isIE && !Ext.supports.CSS3BoxShadow) {
             me.el.dom.style.filter = "progid:DXImageTransform.Microsoft.alpha(opacity=" + me.opacity + ") progid:DXImageTransform.Microsoft.Blur(pixelradius=" + (me.offset) + ")";
         }
-        xy = target[me.localXYNames.get]();
         me.realign(
             xy[0],
             xy[1],

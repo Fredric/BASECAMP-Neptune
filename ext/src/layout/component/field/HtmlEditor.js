@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * Layout class for {@link Ext.form.field.HtmlEditor} fields. Sizes textarea and iframe elements.
@@ -29,7 +29,17 @@ Ext.define('Ext.layout.component.field.HtmlEditor', {
     naturalWidth: 300,
 
     beginLayout: function(ownerContext) {
-        var owner = this.owner;
+        var owner = this.owner,
+            dom;
+            
+        // In gecko, it can cause the browser to hang if we're running a layout with
+        // a heap of data in the textarea (think several images with data urls).
+        // So clear the value at the start, then re-insert it once we're done
+        if (Ext.isGecko) {
+            dom = owner.textareaEl.dom;
+            this.lastValue = dom.value;
+            dom.value = '';
+        }
         this.callParent(arguments);
         
         ownerContext.toolbarContext  = ownerContext.context.getCmp(owner.toolbar);
@@ -61,12 +71,17 @@ Ext.define('Ext.layout.component.field.HtmlEditor', {
     },
     
     finishedLayout: function(){
+        var owner = this.owner;
+        
         this.callParent(arguments);
         // In IE6 quirks sometimes the element requires repainting
         // to show properly.
         if (Ext.isIE9m && Ext.isIEQuirks) {
-            this.owner.el.repaint();
+            owner.el.repaint();
         }    
+        if (Ext.isGecko) {
+            owner.textareaEl.dom.value = this.lastValue;
+        }
     },
     
     publishOwnerWidth: function(ownerContext, width){

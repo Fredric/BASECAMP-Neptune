@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * FieldContainer is a derivation of {@link Ext.container.Container Container} that implements the
@@ -161,8 +161,11 @@ Ext.define('Ext.form.FieldContainer', {
     combineErrors: false,
 
     maskOnDisable: false,
+    // If we allow this to mark with the invalidCls it will cascade to all
+    // child fields, let them handle themselves
+    invalidCls: '',
 
-    fieldSubTpl: '<div id="{id}-containerEl">{%this.renderContainer(out,values)%}</div>',
+    fieldSubTpl: '<div id="{id}-containerEl" class="{containerElCls}">{%this.renderContainer(out,values)%}</div>',
 
     initComponent: function() {
         var me = this;
@@ -171,15 +174,8 @@ Ext.define('Ext.form.FieldContainer', {
         me.initLabelable();
         me.initFieldAncestor();
         
-        if (me.labelAlign == 'top') {
-            // We need to add an extra offset to the DOM checks because
-            // the label is rendered inside the target element.
-            // See Ext.layout.container.Container::getPositionOffset
-            // for more details
-            me.itemNodeOffset = 1;
-        }
-
         me.callParent();
+        me.initMonitor();
     },
     
     getOverflowEl: function(){
@@ -200,6 +196,10 @@ Ext.define('Ext.form.FieldContainer', {
             labelable.x += (me.labelWidth + me.labelPad);
         }
         me.callParent(arguments);
+        if (me.combineLabels) {
+            labelable.oldHideLabel = labelable.hideLabel;
+            labelable.hideLabel = true;
+        }
         me.updateLabel();
     },
 
@@ -211,6 +211,9 @@ Ext.define('Ext.form.FieldContainer', {
         var me = this;
         me.callParent(arguments);
         if (!isDestroying) {
+            if (me.combineLabels) {
+                labelable.hideLabel = labelable.oldHideLabel;
+            }
             me.updateLabel();
         }   
     },
@@ -224,7 +227,11 @@ Ext.define('Ext.form.FieldContainer', {
     },
 
     initRenderData: function() {
-        return Ext.applyIf(this.callParent(), this.getLabelableRenderData());
+        var me = this,
+            data = me.callParent();
+
+        data.containerElCls = me.containerElCls;
+        return Ext.applyIf(data, me.getLabelableRenderData());
     },
 
     /**
@@ -335,12 +342,12 @@ Ext.define('Ext.form.FieldContainer', {
     },
 
     getTargetEl: function() {
-        return this.bodyEl || this.callParent();
+        return this.containerEl;
     },
 
     applyTargetCls: function(targetCls) {
-        var fieldBodyCls = this.fieldBodyCls;
+        var containerElCls = this.containerElCls;
 
-        this.fieldBodyCls = fieldBodyCls ? fieldBodyCls + ' ' + targetCls : targetCls;
+        this.containerElCls = containerElCls ? containerElCls + ' ' + targetCls : targetCls;
     }
 });

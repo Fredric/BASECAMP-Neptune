@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * Represents a 2D point with x and y properties, useful for comparison and instantiation
@@ -64,7 +64,7 @@ Ext.define('Ext.util.Point', {
 
     /**
      * Compare this point and another point
-     * @param {Ext.util.Point/Object} The point to compare with, either an instance
+     * @param {Ext.util.Point/Object} p The point to compare with, either an instance
      * of Ext.util.Point or an object with left and top properties
      * @return {Boolean} Returns whether they are equivalent
      */
@@ -93,8 +93,8 @@ Ext.define('Ext.util.Point', {
 
     /**
      * Determins whether this Point contained by the passed Region, Component or element.
-     * @param {Ext.util.Region/Ext.Component/Ext.dom.Element/HTMLElement} region The rectangle to checkthat this Point is within.
-     * @param {Object/Number} threshold Can be either an object with x and y properties or a number
+     * @param {Ext.util.Region/Ext.Component/Ext.dom.Element/HTMLElement} region
+     * The rectangle to check that this Point is within.
      * @return {Boolean}
      */
     isContainedBy: function(region) {

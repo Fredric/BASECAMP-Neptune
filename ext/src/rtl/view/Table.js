@@ -5,23 +5,23 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 Ext.define('Ext.rtl.view.Table', {
     override: 'Ext.view.Table',
 
     rtlCellTpl: [
         '<td class="' + Ext.baseCSSPrefix + 'rtl {tdCls}" {tdAttr}>',
-            '<div {unselectableAttr} class="' + Ext.baseCSSPrefix + 'rtl ' + Ext.baseCSSPrefix + 'grid-cell-inner"',
-                'style="text-align:{%this.getAlign(values)%};<tpl if="style">{style}</tpl>">{value}</div>',
+            '<div {unselectableAttr} class="' + Ext.baseCSSPrefix + 'rtl ' + Ext.baseCSSPrefix + 'grid-cell-inner {innerCls}"',
+                ' style="text-align:{[this.getAlign(values.align)]};<tpl if="style">{style}</tpl>">{value}</div>',
         '</td>',
         {
             priority: 0,
@@ -43,5 +43,9 @@ Ext.define('Ext.rtl.view.Table', {
         if (me.getHierarchyState().rtl) {
             me.addCellTpl(me.getTpl('rtlCellTpl'));
         }
+    },
+
+    getCellPaddingAfter: function(cell) {
+        return Ext.fly(cell).getPadding(this.getHierarchyState().rtl ? 'l' : 'r');
     }
 });

@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * A display-only text field which is not validated and not submitted. This is useful for when you want to display a
@@ -55,7 +55,7 @@ Ext.define('Ext.form.field.Display', {
     requires: ['Ext.util.Format', 'Ext.XTemplate'],
     alternateClassName: ['Ext.form.DisplayField', 'Ext.form.Display'],
     fieldSubTpl: [
-        '<div id="{id}"',
+        '<div id="{id}" role="input" ',
         '<tpl if="fieldStyle"> style="{fieldStyle}"</tpl>', 
         ' class="{fieldCls}">{value}</div>',
         {
@@ -65,10 +65,18 @@ Ext.define('Ext.form.field.Display', {
     ],
 
     /**
+     * @cfg {Boolean} readOnly
+     * @private
+     */
+    readOnly: true,
+
+    /**
      * @cfg {String} [fieldCls="x-form-display-field"]
      * The default CSS class for the field.
      */
     fieldCls: Ext.baseCSSPrefix + 'form-display-field',
+
+    fieldBodyCls: Ext.baseCSSPrefix + 'form-display-field-body',
 
     /**
      * @cfg {Boolean} htmlEncode
@@ -87,6 +95,12 @@ Ext.define('Ext.form.field.Display', {
      * The scope to execute the {@link #renderer} function. Defaults to this.
      */
 
+    noWrap: false,
+    
+    /**
+     * @cfg {Boolean} validateOnChange
+     * @private
+     */
     validateOnChange: false,
 
     initEvents: Ext.emptyFn,
@@ -110,8 +124,7 @@ Ext.define('Ext.form.field.Display', {
     },
 
     setRawValue: function(value) {
-        var me = this,
-            display;
+        var me = this;
             
         value = Ext.value(value, '');
         me.rawValue = value;
@@ -152,14 +165,6 @@ Ext.define('Ext.form.field.Display', {
      */
     /**
      * @cfg {Boolean} disabled
-     * @private
-     */
-    /**
-     * @cfg {Boolean} readOnly
-     * @private
-     */
-    /**
-     * @cfg {Boolean} validateOnChange
      * @private
      */
     /**

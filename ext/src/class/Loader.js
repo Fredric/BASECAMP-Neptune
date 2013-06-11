@@ -5,19 +5,19 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
-//@tag foundation,core
-//@require ClassManager.js
-//@define Ext.Loader
+// @tag foundation,core
+// @require ClassManager.js
+// @define Ext.Loader
 
 /**
  * @author Jacky Nguyen <jacky@sencha.com>
@@ -1035,14 +1035,15 @@ Ext.Loader = new function() {
                 // we need to destroy the script tag and revert the count
                 // This file will then be forced loaded in synchronous
                 if (syncModeEnabled && isClassFileLoaded.hasOwnProperty(className)) {
-                    Loader.numPendingFiles--;
-                    Loader.removeScriptElement(filePath);
-                    delete isClassFileLoaded[className];
+                    if (!isClassFileLoaded[className]) {
+                        Loader.numPendingFiles--;
+                        Loader.removeScriptElement(filePath);
+                        delete isClassFileLoaded[className];
+                    }
                 }
 
                 if (!isClassFileLoaded.hasOwnProperty(className)) {
                     isClassFileLoaded[className] = false;
-
                     classNameToFilePathMap[className] = filePath;
 
                     Loader.numPendingFiles++;
@@ -1073,12 +1074,17 @@ Ext.Loader = new function() {
          * @param {String} filePath
          */
         onFileLoaded: function(className, filePath) {
+            var loaded = isClassFileLoaded[className];
             Loader.numLoadedFiles++;
 
             isClassFileLoaded[className] = true;
             isFileLoaded[filePath] = true;
 
-            Loader.numPendingFiles--;
+            // In FF, when we sync load something that has had a script tag inserted, the load event may
+            // sometimes fire even if we clean it up and set it to null, so check if we're already loaded here.
+            if (!loaded) {
+                Loader.numPendingFiles--;
+            }
 
             if (Loader.numPendingFiles === 0) {
                 Loader.refreshQueue();
@@ -1108,6 +1114,10 @@ Ext.Loader = new function() {
                 missingClasses = Ext.Array.filter(Ext.Array.unique(missingClasses), function(item) {
                     return !requiresMap.hasOwnProperty(item);
                 }, Loader);
+                
+                if (missingClasses.length < 1) {
+                    return;
+                }
 
                 for (i = 0,ln = missingClasses.length; i < ln; i++) {
                     missingPaths.push(classNameToFilePathMap[missingClasses[i]]);
@@ -1531,7 +1541,12 @@ if (Ext._classPathMetadata) {
 
     Loader.setConfig({
         enabled: true,
-        disableCaching: true,
+        disableCaching:
+            //<debug>
+            (/[?&](?:cache|disableCacheBuster)\b/i.test(location.search) ||
+             /(^|[ ;])ext-cache=1/.test(document.cookie)) ? false : 
+            //</debug>
+            true,
         paths: {
             'Ext': path + 'src'
         }

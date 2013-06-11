@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * @class Ext.chart.series.Pie
@@ -634,7 +634,7 @@ Ext.define('Ext.chart.series.Pie', {
             resizing = chart.resizing,
             config = me.label,
             format = config.renderer,
-            field = [].concat(config.field),
+            field = config.field,
             centerX = me.centerX,
             centerY = me.centerY,
             middle = item.middle,
@@ -648,7 +648,7 @@ Ext.define('Ext.chart.series.Pie', {
             rho = 1,
             theta = Math.atan2(y, x || 1),
             dg = theta * 180 / Math.PI,
-            prevDg;
+            prevDg, labelBox, width, height;
 
         opt.hidden = false;
 
@@ -664,12 +664,22 @@ Ext.define('Ext.chart.series.Pie', {
         }
 
         label.setAttributes({
-            text: format(storeItem.get(field[index]))
+            text: format(storeItem.get(field), label, storeItem, item, i, display, animate, index)
         }, true);
 
         switch (display) {
         case 'outside':
+            // calculate the distance to the pie's edge
             rho = Math.sqrt(x * x + y * y) * 2;
+
+            // add the distance from the label's center to its edge
+            label.setAttributes({rotation:{degrees: 0}}, true);
+            labelBox = label.getBBox();
+            width = labelBox.width/2 * Math.cos(theta) + 4;
+            height = labelBox.height/2 * Math.sin(theta) + 4;
+
+            rho += Math.sqrt(width*width + height*height);
+
             //update positions
             opt.x = rho * Math.cos(theta) + centerX;
             opt.y = rho * Math.sin(theta) + centerY;

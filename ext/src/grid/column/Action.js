@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * A Grid header type which renders an icon, or a series of icons in a grid cell, and offers a scoped click
@@ -230,10 +230,13 @@ Ext.define('Ext.grid.column.Action', {
 
     sortable: false,
 
+    innerCls: Ext.baseCSSPrefix + 'grid-cell-inner-action-col',
+
     constructor: function(config) {
         var me = this,
             cfg = Ext.apply({}, config),
-            items = cfg.items || [me],
+            // Items may be defined on the prototype
+            items = cfg.items || me.items || [me],
             hasGetClass,
             i,
             len;
@@ -242,13 +245,10 @@ Ext.define('Ext.grid.column.Action', {
         me.origRenderer = cfg.renderer || me.renderer;
         me.origScope = cfg.scope || me.scope;
         
-        delete me.renderer;
-        delete me.scope;
-        delete cfg.renderer;
-        delete cfg.scope;
+        me.renderer = me.scope = cfg.renderer = cfg.scope = null;
         
         // This is a Container. Delete the items config to be reinstated after construction.
-        delete cfg.items;
+        cfg.items = null;
         me.callParent([cfg]);
 
         // Items is an array property of ActionColumns
@@ -300,7 +300,7 @@ Ext.define('Ext.grid.column.Action', {
                 item.hasActionConfiguration = true;
             }
 
-            ret += '<img alt="' + (item.altText || me.altText) + '" src="' + (item.icon || Ext.BLANK_IMAGE_URL) +
+            ret += '<img role="button" alt="' + (item.altText || me.altText) + '" src="' + (item.icon || Ext.BLANK_IMAGE_URL) +
                 '" class="' + prefix + 'action-col-icon ' + prefix + 'action-col-' + String(i) + ' ' + (disabled ? prefix + 'item-disabled' : ' ') +
                 ' ' + (Ext.isFunction(item.getClass) ? item.getClass.apply(item.scope || scope, arguments) : (item.iconCls || me.iconCls || '')) + '"' +
                 (tooltip ? ' data-qtip="' + tooltip + '"' : '') + ' />';

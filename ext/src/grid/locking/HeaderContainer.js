@@ -5,48 +5,64 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * Private class which acts as a HeaderContainer for the Lockable which aggregates all columns
  * from both sides of the Loackable. It is never rendered, it's just used to interrogate the
  * column collection.
+ * @private
  */
 Ext.define('Ext.grid.locking.HeaderContainer', {
     extend: 'Ext.grid.header.Container',
+    requires: [
+        'Ext.grid.ColumnManager'
+    ],
 
     constructor: function(lockable) {
         var me = this,
             events,
             event,
-            eventNames = [];
+            eventNames = [],
+            lockedGrid = lockable.lockedGrid,
+            normalGrid = lockable.normalGrid;
 
         me.lockable = lockable;
         me.callParent();
 
+        // Create the unified column manager for the lockable grid assembly
+        lockedGrid.columnManager.rootColumns =
+            normalGrid.columnManager.rootColumns =
+            lockable.columnManager =
+            me.columnManager = new Ext.grid.ColumnManager(lockedGrid.headerCt, normalGrid.headerCt);
+
         // Relay events from both sides' headerCts
-        events = me.lockable.lockedGrid.headerCt.events;
+        events = lockedGrid.headerCt.events;
         for (event in events) {
             if (events.hasOwnProperty(event)) {
                 eventNames.push(event);
             }
         }
-        me.relayEvents(me.lockable.lockedGrid.headerCt, eventNames);
-        me.relayEvents(me.lockable.normalGrid.headerCt, eventNames);
+        me.relayEvents(lockedGrid.headerCt, eventNames);
+        me.relayEvents(normalGrid.headerCt, eventNames);
+    },
+
+    getRefItems: function() {
+        return this.lockable.lockedGrid.headerCt.getRefItems().concat(this.lockable.normalGrid.headerCt.getRefItems());
     },
 
     // This is the function which all other column access methods are based upon
     // Return the full column set for the whole Lockable assembly
-    getGridColumns: function(flushCache) {
-        return this.lockable.lockedGrid.headerCt.getGridColumns(flushCache).concat(this.lockable.normalGrid.headerCt.getGridColumns(flushCache));
+    getGridColumns: function() {
+        return this.lockable.lockedGrid.headerCt.getGridColumns().concat(this.lockable.normalGrid.headerCt.getGridColumns());
     },
 
     // Lockable uses its headerCt to gather column state

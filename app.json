@@ -1,7 +1,8 @@
 {
     "name": "BASECAMP",
-    "requires": [{
-        "name": "ext-theme-neptune",
-        "version": "4.2.0"
-    }]
+
+    "requires": [
+    ],
+
+    "id": "24b971da-6875-4453-b398-4f9d41999989"
 }

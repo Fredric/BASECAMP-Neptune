@@ -5,19 +5,19 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
-//@tag dom,core
-//@require util/Event.js
-//@define Ext.EventManager
+// @tag dom,core
+// @require util/Event.js
+// @define Ext.EventManager
 
 /**
  * @class Ext.EventManager
@@ -31,7 +31,10 @@ Ext.EventManager = new function() {
     var EventManager = this,
         doc = document,
         win = window,
+        escapeRx = /\\/g,
         prefix = Ext.baseCSSPrefix,
+        // IE9strict addEventListener has some issues with using synthetic events
+        supportsAddEventListener = !Ext.isIE9 && 'addEventListener' in doc,
         readyEvent,
         initExtCss = function() {
             // find the body element
@@ -168,8 +171,8 @@ Ext.EventManager = new function() {
                     Ext.isBorderBox = true;
                 }
 
-                if(Ext.isBorderBox) {
-                    htmlCls.push(prefix + 'border-box');
+                if(!Ext.isBorderBox) {
+                    htmlCls.push(prefix + 'content-box');
                 }
                 if (Ext.isStrict) {
                     htmlCls.push(prefix + 'strict');
@@ -483,11 +486,12 @@ Ext.EventManager = new function() {
          * 
          * {@link Ext.EventManager#on} is an alias for {@link Ext.EventManager#addListener}.
          *
-         * @param {String/HTMLElement} el The html element or id to assign the event handler to.
+         * @param {String/Ext.Element/HTMLElement/Window} el The html element or id to assign the event handler to.
          *
          * @param {String} eventName The name of the event to listen for.
          *
-         * @param {Function} handler The handler function the event invokes.
+         * @param {Function/String} handler The handler function the event invokes. A String parameter
+         * is assumed to be method name in `scope` object, or Element object if no scope is provided.
          * @param {Ext.EventObject} handler.event The {@link Ext.EventObject EventObject} describing the event.
          * @param {Ext.dom.Element} handler.target The Element which was the target of the event.
          * Note that this may be filtered by using the `delegate` option.
@@ -521,7 +525,11 @@ Ext.EventManager = new function() {
             }
 
             var dom = element.dom || Ext.getDom(element),
-                bind, wrap, cache, id, cacheItem;
+                hasAddEventListener, bind, wrap, cache, id, cacheItem, capture;
+            
+            if (typeof fn === 'string') {
+                fn = Ext.resolveMethod(fn, scope || element);
+            }
 
             //<debug>
             if (!fn) {
@@ -544,8 +552,11 @@ Ext.EventManager = new function() {
             // add all required data into the event cache
             cache = EventManager.getEventListenerCache(element.dom ? element : dom, eventName);
             eventName = bind.eventName;
+
+            // In IE9 we prefer to use attachEvent but it's not available for some Elements (SVG)
+            hasAddEventListener = supportsAddEventListener || (Ext.isIE9 && !dom.attachEvent);
             
-            if (dom.attachEvent) {
+            if (!hasAddEventListener) {
                 id = EventManager.normalizeId(dom);
                 // If there's no id we don't have any events bound, so we never
                 // need to clone at this point.
@@ -563,14 +574,15 @@ Ext.EventManager = new function() {
                 }
             }
 
+            capture = !!options.capture;
             cache.push({
                 fn: fn,
                 wrap: wrap,
-                scope: scope
+                scope: scope,
+                capture: capture 
             });
 
-            
-            if (dom.attachEvent) {
+            if (!hasAddEventListener) {
                 // If cache length is 1, it means we're binding the first event
                 // for this element for this type
                 if (cache.length === 1) {
@@ -583,7 +595,7 @@ Ext.EventManager = new function() {
                     dom.attachEvent('on' + eventName, fn);
                 }
             } else {
-                dom.addEventListener(eventName, wrap, options.capture || false);
+                dom.addEventListener(eventName, wrap, capture);
             }
 
             if (dom == doc && eventName == 'mousedown') {
@@ -593,7 +605,7 @@ Ext.EventManager = new function() {
         
         // Handle the case where the window/document already has an id attached.
         // In this case we still want to return our custom window/doc id.
-        normalizeId: function(dom) {
+        normalizeId: function(dom, force) {
             var id;
             if (dom === document) {
                 id = Ext.documentId;
@@ -637,7 +649,7 @@ Ext.EventManager = new function() {
          *
          * {@link Ext.EventManager#on} is an alias for {@link Ext.EventManager#addListener}.
          *
-         * @param {String/HTMLElement} el The id or html element from which to remove the listener.
+         * @param {String/Ext.Element/HTMLElement/Window} el The id or html element from which to remove the listener.
          * @param {String} eventName The name of the event.
          * @param {Function} fn The handler function to remove. **This must be a reference to the function passed
          * into the {@link #addListener} call.**
@@ -655,9 +667,19 @@ Ext.EventManager = new function() {
                 id, el = element.dom ? element : Ext.get(dom),
                 cache = EventManager.getEventListenerCache(el, eventName),
                 bindName = EventManager.normalizeEvent(eventName).eventName,
-                i = cache.length, j, cacheItem,
+                i = cache.length, j, cacheItem, hasRemoveEventListener,
                 listener, wrap;
+                
+            if (!dom) {
+                return;
+            }
 
+            // In IE9 we prefer to use detachEvent but it's not available for some Elements (SVG)
+            hasRemoveEventListener = supportsAddEventListener || (Ext.isIE9 && !dom.detachEvent);
+            
+            if (typeof fn === 'string') {
+                fn = Ext.resolveMethod(fn, scope || element);
+            }
 
             while (i--) {
                 listener = cache[i];
@@ -680,7 +702,7 @@ Ext.EventManager = new function() {
                         delete wrap.tasks;
                     }
 
-                    if (dom.detachEvent) {
+                    if (!hasRemoveEventListener) {
                         // if length is 1, we're removing the final event, actually
                         // unbind it from the element
                         id = EventManager.normalizeId(dom, true);
@@ -696,7 +718,7 @@ Ext.EventManager = new function() {
                             dom.detachEvent('on' + bindName, fn);
                         }
                     } else {
-                        dom.removeEventListener(bindName, wrap, false);
+                        dom.removeEventListener(bindName, wrap, listener.capture);
                     }
 
                     if (wrap && dom == doc && eventName == 'mousedown') {
@@ -710,10 +732,10 @@ Ext.EventManager = new function() {
         },
 
         /**
-        * Removes all event handers from an element.  Typically you will use {@link Ext.Element#removeAllListeners}
-        * directly on an Element in favor of calling this version.
-        * @param {String/HTMLElement} el The id or html element from which to remove all event handlers.
-        */
+         * Removes all event handers from an element.  Typically you will use {@link Ext.Element#removeAllListeners}
+         * directly on an Element in favor of calling this version.
+         * @param {String/Ext.Element/HTMLElement/Window} el The id or html element from which to remove all event handlers.
+         */
         removeAll : function(element) {
             var id = (typeof element === 'string') ? element : element.id,
                 cache, events, eventName;
@@ -734,7 +756,7 @@ Ext.EventManager = new function() {
         /**
          * Recursively removes all previous added listeners from an element and its children. Typically you will use {@link Ext.Element#purgeAllListeners}
          * directly on an Element in favor of calling this version.
-         * @param {String/HTMLElement} el The id or html element from which to remove all event handlers.
+         * @param {String/Ext.Element/HTMLElement/Window} el The id or html element from which to remove all event handlers.
          * @param {String} eventName (optional) The name of the event.
          */
         purgeElement : function(element, eventName) {
@@ -768,12 +790,12 @@ Ext.EventManager = new function() {
         createListenerWrap : function(dom, ename, fn, scope, options) {
             options = options || {};
 
-            var f, gen, escapeRx = /\\/g, wrap = function(e, args) {
+            var f, gen, wrap = function(e, args) {
                 // Compile the implementation upon first firing
                 if (!gen) {
                     f = ['if(!' + Ext.name + ') {return;}'];
 
-                    if(options.buffer || options.delay || options.freezeEvent) {
+                    if (options.buffer || options.delay || options.freezeEvent) {
                         if (options.freezeEvent) {
                             // If we're freezing, we still want to update the singleton event object
                             // as well as returning a frozen copy
@@ -797,7 +819,7 @@ Ext.EventManager = new function() {
                         f.push('if(e.target !== options.target) {return;}');
                     }
 
-                    if(options.stopEvent) {
+                    if (options.stopEvent) {
                         f.push('e.stopEvent();');
                     } else {
                         if(options.preventDefault) {
@@ -808,16 +830,16 @@ Ext.EventManager = new function() {
                         }
                     }
 
-                    if(options.normalized === false) {
+                    if (options.normalized === false) {
                         f.push('e = e.browserEvent;');
                     }
 
-                    if(options.buffer) {
+                    if (options.buffer) {
                         f.push('(wrap.task && clearTimeout(wrap.task));');
                         f.push('wrap.task = setTimeout(function() {');
                     }
 
-                    if(options.delay) {
+                    if (options.delay) {
                         f.push('wrap.tasks = wrap.tasks || [];');
                         f.push('wrap.tasks.push(setTimeout(function() {');
                     }
@@ -825,7 +847,7 @@ Ext.EventManager = new function() {
                     // finally call the actual handler fn
                     f.push('result = fn.call(scope || dom, e, t, options);');
 
-                    if(options.single) {
+                    if (options.single) {
                         f.push('evtMgr.removeListener(dom, ename, fn, scope);');
                     }
 
@@ -837,11 +859,11 @@ Ext.EventManager = new function() {
                         f.push('}');
                     }
 
-                    if(options.delay) {
+                    if (options.delay) {
                         f.push('}, ' + options.delay + '));');
                     }
 
-                    if(options.buffer) {
+                    if (options.buffer) {
                         f.push('}, ' + options.buffer + ');');
                     }
                     f.push('return result;');
@@ -920,7 +942,7 @@ Ext.EventManager = new function() {
 
         /**
          * Stop the event (preventDefault and stopPropagation)
-         * @param {Event} The event to stop
+         * @param {Event} event The event to stop
          */
         stopEvent: function(event) {
             EventManager.stopPropagation(event);
@@ -929,7 +951,7 @@ Ext.EventManager = new function() {
 
         /**
          * Cancels bubbling of the event.
-         * @param {Event} The event to stop bubbling.
+         * @param {Event} event The event to stop bubbling.
          */
         stopPropagation: function(event) {
             event = event.browserEvent || event;
@@ -942,7 +964,7 @@ Ext.EventManager = new function() {
 
         /**
          * Prevents the browsers default handling of the event.
-         * @param {Event} The event to prevent the default
+         * @param {Event} event The event to prevent the default
          */
         preventDefault: function(event) {
             event = event.browserEvent || event;
@@ -1188,7 +1210,7 @@ Ext.EventManager = new function() {
     });
 
     // route "< ie9-Standards" to a legacy IE onReady implementation
-    if(!('addEventListener' in document) && document.attachEvent) {
+    if(!supportsAddEventListener && document.attachEvent) {
         Ext.apply( EventManager, {
             /* Customized implementation for Legacy IE.  The default implementation is configured for use
              *  with all other 'standards compliant' agents.

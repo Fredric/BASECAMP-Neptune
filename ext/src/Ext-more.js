@@ -5,18 +5,19 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
-//@tag extras,core
-//@require misc/JSON.js
+// @tag extras,core
+// @require misc/JSON.js
+// @define Ext
 
 /**
  * @class Ext
@@ -169,7 +170,7 @@ Ext.apply(Ext, {
 
     /**
      * Returns the current document body as an {@link Ext.Element}.
-     * @return Ext.Element The document body
+     * @return {Ext.Element} The document body
      */
     getBody: (function() {
         var body;
@@ -180,7 +181,7 @@ Ext.apply(Ext, {
 
     /**
      * Returns the current document head as an {@link Ext.Element}.
-     * @return Ext.Element The document head
+     * @return {Ext.Element} The document head
      * @method
      */
     getHead: (function() {
@@ -192,7 +193,7 @@ Ext.apply(Ext, {
 
     /**
      * Returns the current HTML document object as an {@link Ext.Element}.
-     * @return Ext.Element The document
+     * @return {Ext.Element} The document
      */
     getDoc: (function() {
         var doc;
@@ -216,8 +217,8 @@ Ext.apply(Ext, {
      * {@link Ext.util.Observable} can be passed in.  Any number of elements and/or components can be
      * passed into this function in a single call as separate arguments.
      *
-     * @param {Ext.Element/Ext.Component/Ext.Element[]/Ext.Component[]...} args
-     * An {@link Ext.Element}, {@link Ext.Component}, or an Array of either of these to destroy
+     * @param {Ext.dom.Element/Ext.util.Observable/Ext.dom.Element[]/Ext.util.Observable[]...} args
+     * Any number of elements or components, or an Array of either of these to destroy.
      */
     destroy: function() {
         var ln = arguments.length,
@@ -228,11 +229,11 @@ Ext.apply(Ext, {
             if (arg) {
                 if (Ext.isArray(arg)) {
                     this.destroy.apply(this, arg);
-                }
-                else if (Ext.isFunction(arg.destroy)) {
+                } else if (arg.isStore) {
+                    arg.destroyStore();
+                } else if (Ext.isFunction(arg.destroy)) {
                     arg.destroy();
-                }
-                else if (arg.dom) {
+                } else if (arg.dom) {
                     arg.remove();
                 }
             }
@@ -240,28 +241,69 @@ Ext.apply(Ext, {
     },
 
     /**
-     * Execute a callback function in a particular scope. If no function is passed the call is ignored.
+     * Execute a callback function in a particular scope. If `callback` argument is a
+     * function reference, that is called. If it is a string, the string is assumed to
+     * be the name of a method on the given `scope`. If no function is passed the call
+     * is ignored.
      *
-     * For example, these lines are equivalent:
+     * For example, these calls are equivalent:
      *
-     *     Ext.callback(myFunc, this, [arg1, arg2]);
-     *     Ext.isFunction(myFunc) && myFunc.apply(this, [arg1, arg2]);
+     *      var myFunc = this.myFunc;
+     *
+     *      Ext.callback('myFunc', this, [arg1, arg2]);
+     *      Ext.callback(myFunc, this, [arg1, arg2]);
+     *
+     *      Ext.isFunction(myFunc) && this.myFunc(arg1, arg2);
      *
      * @param {Function} callback The callback to execute
      * @param {Object} [scope] The scope to execute in
      * @param {Array} [args] The arguments to pass to the function
      * @param {Number} [delay] Pass a number to delay the call by a number of milliseconds.
+     * @return The value returned by the callback or `undefined` (if there is a `delay`
+     * or if the `callback` is not a function).
      */
-    callback: function(callback, scope, args, delay){
-        if(Ext.isFunction(callback)){
+    callback: function (callback, scope, args, delay) {
+        var fn, ret;
+
+        if (Ext.isFunction(callback)){
+            fn = callback;
+        } else if (scope && Ext.isString(callback)) {
+            fn = scope[callback];
+            //<debug>
+            if (!fn) {
+                Ext.Error.raise('No method named "' + callback + '"');
+            }
+            //</debug>
+        }
+
+        if (fn) {
             args = args || [];
             scope = scope || window;
             if (delay) {
-                Ext.defer(callback, delay, scope, args);
+                Ext.defer(fn, delay, scope, args);
             } else {
-                callback.apply(scope, args);
+                ret = fn.apply(scope, args);
             }
         }
+
+        return ret;
+    },
+    
+    /**
+     * @private
+     */
+    resolveMethod: function(fn, scope) {
+        if (Ext.isFunction(fn)) {
+            return fn;
+        }
+        
+        //<debug>
+        if (!Ext.isObject(scope) || !Ext.isFunction(scope[fn])) {
+            Ext.Error.raise('No method named "' + fn + '"');
+        }
+        //</debug>
+        
+        return scope[fn];
     },
 
     /**
@@ -537,7 +579,7 @@ Opera 11.11 - Opera/9.80 (Windows NT 6.1; U; en) Presto/2.8.131 Version/11.11
     nullLog.info = nullLog.warn = nullLog.error = Ext.emptyFn;
 
     // also update Version.js
-    Ext.setVersion('extjs', '4.2.0.489');
+    Ext.setVersion('extjs', '4.2.1.883');
     Ext.apply(Ext, {
         /**
          * @property {String} SSL_SECURE_URL
@@ -1041,8 +1083,8 @@ Opera 11.11 - Opera/9.80 (Windows NT 6.1; U; en) Presto/2.8.131 Version/11.11
          * operating system settings, such as the theme or font size.
          * @param {Boolean} [force] true to force a recalculation of the value.
          * @return {Object} An object containing scrollbar sizes.
-         * @return.width {Number} The width of the vertical scrollbar.
-         * @return.height {Number} The height of the horizontal scrollbar.
+         * @return {Number} return.width The width of the vertical scrollbar.
+         * @return {Number} return.height The height of the horizontal scrollbar.
          */
         getScrollbarSize: function (force) {
             if (!Ext.isReady) {
@@ -1333,6 +1375,14 @@ Opera 11.11 - Opera/9.80 (Windows NT 6.1; U; en) Presto/2.8.131 Version/11.11
         },
 
         /**
+         * Sets the default font-family to use for components that support a `glyph` config.
+         * @param {String} fontFamily The name of the font-family
+         */
+        setGlyphFontFamily: function(fontFamily) {
+            Ext._glyphFontFamily = fontFamily;
+        },
+
+        /**
          * @property {Boolean} useShims
          * By default, Ext intelligently decides whether floating elements should be shimmed.
          * If you are using flash, you may want to set this to true.
@@ -1347,10 +1397,10 @@ Opera 11.11 - Opera/9.80 (Windows NT 6.1; U; en) Presto/2.8.131 Version/11.11
  *
  * See `Ext.app.Application` for details.
  *
- * @param {Object/String} Application config object or name of a class derived from Ext.app.Application.
+ * @param {Object/String} config Application config object or name of a class derived from Ext.app.Application.
  */
 Ext.application = function(config) {
-    var App;
+    var App, paths, ns;
     
     if (typeof config === "string") {
         Ext.require(config, function(){
@@ -1358,6 +1408,20 @@ Ext.application = function(config) {
         });
     }
     else {
+        // We have to process `paths` before creating Application class,
+        // or `requires` won't work.
+        Ext.Loader.setPath(config.name, config.appFolder || 'app');
+        
+        if (paths = config.paths) {
+            for (ns in paths) {
+                if (paths.hasOwnProperty(ns)) {
+                    Ext.Loader.setPath(ns, paths[ns]);
+                }
+            }
+        }
+        
+        config['paths processed'] = true;
+        
         // Let Ext.define do the hard work but don't assign a class name.
         //
         Ext.define(config.name + ".$application", Ext.apply({

@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * @private
@@ -27,42 +27,61 @@ Ext.define('Ext.grid.plugin.BufferedRendererTableView', {
 
     // Listener function for the Store's add event
     onAdd: function(store, records, index) {
-        var bufferedRenderer = this.bufferedRenderer,
-            rows = this.all;
+        var me = this,
+            bufferedRenderer = me.bufferedRenderer,
+            rows = me.all;
 
         // The newly added records will put us over the buffered view size, so we cannot just add as normal.
-        if (bufferedRenderer && (rows.getCount() + records.length) > bufferedRenderer.viewSize) {
+        if (me.rendered && bufferedRenderer && (rows.getCount() + records.length) > bufferedRenderer.viewSize) {
 
             // Index puts the new row(s) in the visible area, then we have to refresh the view
             if (index < rows.startIndex + bufferedRenderer.viewSize && (index + records.length) > rows.startIndex) {
-                this.onDataRefresh();
+                me.refreshView();
             }
             // New rows outside of visible area, just ensure that the scroll range is updated
             else {
-                bufferedRenderer.stretchView(this, bufferedRenderer.getScrollHeight());
+                bufferedRenderer.stretchView(me, bufferedRenderer.getScrollHeight());
             }
         }
         // No BufferedRenderer present
         // or
         // View has not yet reached the viewSize: we can add as normal.
         else {
-            this.callParent([store, records, index]);
+            me.callParent([store, records, index]);
         }
     },
 
-    // Listener function for the Store's bulkremove event
     onRemove: function(store, records, indices) {
-        var bufferedRenderer = this.bufferedRenderer;
+        var me = this,
+            bufferedRenderer = me.bufferedRenderer;
 
-        // The view has the full complement of rows that the BufferedRenderer needs - must refresh
-        if (bufferedRenderer && this.all.getCount() >= bufferedRenderer.viewSize) {
-            this.onDataRefresh();
+        // Ensure all records are removed from the view
+        me.callParent([store, records, indices]);
+
+        // If there's a BufferedRenderer, the view must refresh to keep the view correct.
+        // Removing *may* have removed all of the rendered rows, leaving whitespace below the group header, 
+        // so the refresh will be needed to keep the buffer rendered zone valid - to pull records up from
+        // below the removed zone into visibility.
+        if (me.rendered && bufferedRenderer) {
+            if (me.dataSource.getCount() > bufferedRenderer.viewSize) {
+                me.refreshView();
+            }
+            // No overflow, still we have to ensure the scroll range is updated
+            else {
+                bufferedRenderer.stretchView(me, bufferedRenderer.getScrollHeight());
+            }
         }
-        // No BufferedRenderer present
-        // or
-        // View has not yet reached the viewSize: we can add as normal.
-        else {
-            this.callParent([store, records, indices]);
+    },
+
+    // When there's a buffered renderer present, store refresh events cause TableViews to go to scrollTop:0
+    onDataRefresh: function() {
+        var me = this;
+
+        if (me.bufferedRenderer) {
+            // Clear NodeCache. Do NOT remove nodes from DOM - that would blur the view, and then refresh will not refocus after the refresh.
+            me.all.clear();
+            me.bufferedRenderer.onStoreClear();
         }
+        me.callParent();
     }
 });

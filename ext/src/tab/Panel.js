@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * @author Ed Spencer, Tommy Maintz, Brian Moeskau
@@ -325,7 +325,7 @@ Ext.define('Ext.tab.Panel', {
     requires: ['Ext.layout.container.Card', 'Ext.tab.Bar'],
 
     /**
-     * @cfg {string} tabPosition
+     * @cfg {"top"/"bottom"/"left"/"right"} tabPosition
      * The position where the tab strip should be rendered. Can be `top`, `bottom`,
      * `left` or `right`
      */
@@ -411,13 +411,14 @@ Ext.define('Ext.tab.Panel', {
             owner: me,
             deferredRender: me.deferredRender,
             itemCls: me.itemCls,
-            activeItem: me.activeTab
+            activeItem: activeTab
         }, me.layout));
 
         /**
          * @property {Ext.tab.Bar} tabBar Internal reference to the docked TabBar
          */
         me.tabBar = new Ext.tab.Bar(Ext.apply({
+            ui: me.ui,
             dock: me.tabPosition,
             orientation: (tabPosition == 'top' || tabPosition == 'bottom') ? 'horizontal' : 'vertical',
             plain: me.plain,
@@ -452,14 +453,11 @@ Ext.define('Ext.tab.Panel', {
         me.callParent(arguments);
 
         // We have to convert the numeric index/string ID config into its component reference
-        me.activeTab = me.getComponent(activeTab);
+        activeTab = me.activeTab = me.getComponent(activeTab);
 
         // Ensure that the active child's tab is rendered in the active UI state
-        if (me.activeTab) {
-            me.activeTab.tab.activate(true);
-
-            // So that it knows what to deactivate in subsequent tab changes 
-            me.tabBar.activeTab = me.activeTab.tab;
+        if (activeTab) {
+        	me.tabBar.setActiveTab(activeTab.tab, true);
         }
     },
 
@@ -558,6 +556,7 @@ Ext.define('Ext.tab.Panel', {
             cfg = item.tabConfig || {},
             defaultConfig = {
                 xtype: 'tab',
+                ui: me.tabBar.ui,
                 card: item,
                 disabled: item.disabled,
                 closable: item.closable,

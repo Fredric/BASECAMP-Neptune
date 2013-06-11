@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * @class Ext.fx.target.Component
@@ -74,7 +74,6 @@ Ext.define('Ext.fx.target.Component', {
 
     setAttr: function(targetData, isFirstFrame, isLastFrame) {
         var me = this,
-            target = me.target,
             ln = targetData.length,
             attrs, attr, o, i, j, targets, left, top, w, h,
             methodsToCall = {},
@@ -117,9 +116,13 @@ Ext.define('Ext.fx.target.Component', {
                 // outer element to clip the contents.
                 o.target.el.setSize(w, h);
                 if (isLastFrame || me.dynamic) {
+                    // Defer the final sizing & layout until we are outside of this frame.
                     // In case anything in the resulting layout calls animation.
                     // If it does, *this* frame will fire again... recursively
-                    Ext.Function.defer(o.target.setSize, 1, o.target, [w, h]);
+                    Ext.globalEvents.on({
+                        idle: Ext.Function.bind(o.target.setSize, o.target, [w, h]),
+                        single: true
+                    });
                 }
             }
             if (methodsToCall.setOpacity) {

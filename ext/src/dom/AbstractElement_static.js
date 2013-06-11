@@ -5,17 +5,17 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
-//@tag dom,core
+// @tag dom,core
 /**
  */
 Ext.define('Ext.dom.AbstractElement_static', {
@@ -95,27 +95,32 @@ Ext.define('Ext.dom.AbstractElement_static', {
         */
         parseBox: function(box) {
             box = box || 0;
+            
+            var type = typeof box,
+                parts,
+                ln;
 
-            if (typeof box === 'number') {
+            if (type === 'number') {
                 return {
                     top   : box,
                     right : box,
                     bottom: box,
                     left  : box
                 };
+             } else if (type !== 'string') {
+                 // If not a number or a string, assume we've been given a box config.
+                 return box;
              }
 
-            var parts  = box.split(' '),
-                ln = parts.length;
+            parts  = box.split(' ');
+            ln = parts.length;
 
             if (ln == 1) {
                 parts[1] = parts[2] = parts[3] = parts[0];
-            }
-            else if (ln == 2) {
+            } else if (ln == 2) {
                 parts[2] = parts[0];
                 parts[3] = parts[1];
-            }
-            else if (ln == 3) {
+            } else if (ln == 3) {
                 parts[3] = parts[1];
             }
 
@@ -138,7 +143,7 @@ Ext.define('Ext.dom.AbstractElement_static', {
          */
         unitizeBox: function(box, units) {
             var a = this.addUnits,
-                b = Ext.isObject(box) ? box : this.parseBox(box);
+                b = this.parseBox(box);
 
             return a(b.top, units) + ' ' +
                    a(b.right, units) + ' ' +

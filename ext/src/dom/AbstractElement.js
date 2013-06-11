@@ -5,18 +5,18 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
-//@tag dom,core
-//@require Ext.Supports
+// @tag dom,core
+// @require Ext.Supports
 
 /**
  * @private
@@ -42,6 +42,12 @@ Ext.define('Ext.dom.AbstractElement', {
          *
          * **This method does not retrieve {@link Ext.Component Component}s.** This method retrieves Ext.dom.Element
          * objects which encapsulate DOM elements. To retrieve a Component by its ID, use {@link Ext.ComponentManager#get}.
+         * 
+         * When passing an id, it should not include the `#` character that is used for a css selector.
+         * 
+         *     // For an element with id 'foo'
+         *     Ext.get('foo'); // Correct
+         *     Ext.get('#foo'); // Incorrect
          *
          * Uses simple caching to consistently return the same object. Automatically fixes if an object was recreated with
          * the same id via AJAX or DOM.
@@ -164,10 +170,10 @@ Ext.define('Ext.dom.AbstractElement', {
         /**
          * <p>Returns an array of unique class names based upon the input strings, or string arrays.</p>
          * <p>The number of parameters is unlimited.</p>
-         * <p>Example</p><code><pre>
+         * <p>Example</p><pre><code>
 // Add x-invalid and x-mandatory classes, do not duplicate
 myElement.dom.className = Ext.core.Element.mergeClsList(this.initialClasses, 'x-invalid x-mandatory');
-</pre></code>
+</code></pre>
          * @param {Mixed} clsList1 A string of class names, or an array of class names.
          * @param {Mixed} clsList2 A string of class names, or an array of class names.
          * @return {Array} An array of strings representing remaining unique, merged class names. If class names were added to the first list, the <code>changed</code> property will be <code>true</code>.
@@ -209,10 +215,10 @@ myElement.dom.className = Ext.core.Element.mergeClsList(this.initialClasses, 'x-
         /**
          * <p>Returns an array of unique class names deom the first parameter with all class names
          * from the second parameter removed.</p>
-         * <p>Example</p><code><pre>
+         * <p>Example</p><pre><code>
 // Remove x-invalid and x-mandatory classes if present.
 myElement.dom.className = Ext.core.Element.removeCls(this.initialClasses, 'x-invalid x-mandatory');
-</pre></code>
+</code></pre>
          * @param {Mixed} existingClsList A string of class names, or an array of class names.
          * @param {Mixed} removeClsList A string of class names, or an array of class names to remove from <code>existingClsList</code>.
          * @return {Array} An array of strings representing remaining class names. If class names were removed, the <code>changed</code> property will be <code>true</code>.

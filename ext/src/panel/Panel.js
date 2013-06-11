@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * Panel is a container that has specific functionality and structural components that make it the perfect building
@@ -319,10 +319,29 @@ Ext.define('Ext.panel.Panel', {
      preventHeader: false,
 
     /**
-     * @cfg {Boolean/Object} header
+     * @cfg {Boolean/Object} [header]
      * Pass as `false` to prevent a Header from being created and shown.
      *
      * Pass as a config object (optionally containing an `xtype`) to custom-configure this Panel's header.
+     *
+     * See {@link Ext.panel.Header} for all the options that may be specified here.
+     *
+     * A {@link Ext.panel.Header panel header} is a {@link Ext.container.Container} which contains the Panel's {@link #title} and {@link #tools}.
+     * You may also configure the Panel's `header` option with its own child items which go *before* the {@link #tools}
+     *
+     * By default the panel {@link #title} is inserted after items configured in this config, but before any tools.
+     * To insert the title at any point in the full array, specify the {@link Ext.panel.Header #titlePosition} config:
+     *
+     *    new Ext.panel.Panel({
+     *        title: 'Test',
+     *        tools: [{
+     *            type: 'refresh
+     *        }, {
+     *            type: 'help'
+     *        }],
+     *        titlePosition: 2 // Title will come AFTER the two tools
+     *        ...
+     *    });
      *
      */
     header: undefined,
@@ -361,17 +380,20 @@ Ext.define('Ext.panel.Panel', {
      *         type:'refresh',
      *         tooltip: 'Refresh form Data',
      *         // hidden:true,
-     *         handler: function(event, toolEl, panel){
+     *         handler: function(event, toolEl, panelHeader) {
      *             // refresh logic
      *         }
      *     },
      *     {
      *         type:'help',
      *         tooltip: 'Get Help',
-     *         handler: function(event, toolEl, panel){
+     *         callback: function(panel, tool, event) {
      *             // show help here
      *         }
      *     }]
+     * 
+     * The difference between `handler` and `callback` is the signature. For details on
+     * the distinction, see {@link Ext.panel.Tool}.
      */
 
     /**
@@ -414,10 +436,62 @@ Ext.define('Ext.panel.Panel', {
      */
 
     /**
+     * @cfg {Number/String} glyph
+     * @inheritdoc Ext.panel.Header#glyph
+     */
+
+    /**
      * @cfg {String} headerOverCls
      * Optional CSS class to apply to the header element on mouseover
      */
 
+    /**
+     * @override
+     * @cfg {Boolean} constrain
+     * True to constrain the panel within its containing element, false to allow it to fall outside of its containing
+     * element. By default floating components such as Windows will be rendered to `document.body`. To render and constrain the window within
+     * another element specify {@link #renderTo}. Optionally the header only can be constrained
+     * using {@link #constrainHeader}.
+     */
+    constrain: false,
+
+    /**
+     * @cfg {Boolean} constrainHeader
+     * True to constrain the panel header within its containing element (allowing the panel body to fall outside of
+     * its containing element) or false to allow the header to fall outside its containing element.
+     * Optionally the entire panel can be constrained using {@link #constrain}.
+     */
+    constrainHeader: false,
+
+    /**
+     * @cfg {Boolean} [simpleDrag=false]
+     * When {@link #cfg-draggable} is `true`, Specify this as `true` to  cause the `draggable` config
+     * to work the same as it does in {@link Ext.window.Window Window}. This Panel
+     * just becomes movable. No DragDrop instances receive any notifications.
+     * For example:
+     *
+     *     @example
+     *     var win = Ext.create('widget.window', {
+     *         height: 300,
+     *         width: 300,
+     *         title: 'Constraining Window',
+     *         closable: false,
+     *         items: {
+     *             title: "Floating Panel",
+     *             width: 100,
+     *             height: 100,
+     *             floating: true,
+     *             draggable: true,
+     *             constrain: true,
+     *             simpleDrag: true
+     *         }
+     *     });
+     *     win.show();
+     *     // Floating components begin life hidden
+     *     win.child('[title=Floating Panel]').show();
+     * 
+     */
+    
     initComponent: function() {
         var me = this;
 
@@ -470,7 +544,7 @@ Ext.define('Ext.panel.Panel', {
 
             /**
              * @event collapse
-             * Fires after this Panel hass collapsed.
+             * Fires after this Panel has collapsed.
              * @param {Ext.panel.Panel} p The Panel that has been collapsed.
              */
             "collapse",
@@ -501,6 +575,15 @@ Ext.define('Ext.panel.Panel', {
              * @param {String} oldIconCls The previous panel iconCls.
              */
             'iconclschange',
+
+            /**
+             * @event glyphchange
+             * Fired when the Panel glyph has been changed by the {@link #setGlyph} method.
+             * @param {Ext.panel.Panel} this
+             * @param {Number/String} newGlyph
+             * @param {Number/String} oldGlyph
+             */
+            'glyphchange',
 
             /**
              * @event float
@@ -597,7 +680,7 @@ Ext.define('Ext.panel.Panel', {
             } else {
                 header.title = newTitle;
             }
-        } else {
+        } else if (me.rendered) {
             me.updateHeader();
         }
 
@@ -670,6 +753,37 @@ Ext.define('Ext.panel.Panel', {
         }
 
         me.fireEvent('iconchange', me, newIcon, oldIcon);
+    },
+
+    /**
+     * Set the glyph for the panel's header. See {@link Ext.panel.Header#glyph}. It will
+     * fire the {@link #glyphchange} event after completion.
+     * @param {Number/String} newGlyph The new glyph
+     * This parameter expects a format consistent with that of {@link #glyph}
+     */
+    setGlyph: function(newGlyph) {
+        var me = this,
+            oldGlyph = me.glyph,
+            header = me.header,
+            placeholder = me.placeholder;
+
+        me.glyph = newGlyph;
+
+        if (header) {
+            if (header.isHeader) {
+                header.setGlyph(newGlyph);
+            } else {
+                header.glyph = newGlyph;
+            }
+        } else {
+            me.updateHeader();
+        }
+
+        if (placeholder && placeholder.setGlyph) {
+            placeholder.setIcon(newGlyph);
+        }
+
+        me.fireEvent('glyphchange', me, newGlyph, oldGlyph);
     },
 
     bridgeToolbars: function() {
@@ -922,7 +1036,7 @@ Ext.define('Ext.panel.Panel', {
         if (me.collapsed) {
             if (me.isPlaceHolderCollapse()) {
                 if (!me.hidden) {
-                    me.hidden = true;
+                    me.setHiddenState(true);
 
                     // This will insert the placeholder Component into the ownerCt's child collection
                     // Its getRenderTree call which is calling this will then iterate again and
@@ -956,9 +1070,16 @@ Ext.define('Ext.panel.Panel', {
      * Panel uses initTools. Subclasses may contribute tools by implementing addTools.
      */
     initTools: function() {
-        var me = this;
+        var me = this,
+            tools = me.tools,
+            i, tool;
 
-        me.tools = me.tools ? Ext.Array.clone(me.tools) : [];
+        me.tools = [];
+        for (i = tools && tools.length; i; ) {
+            --i;
+            me.tools[i] = tool = tools[i];
+            tool.toolOwner = me;
+        }
 
         // Add a collapse tool unless configured to not show a collapse tool
         // or to not even show a header.
@@ -966,11 +1087,11 @@ Ext.define('Ext.panel.Panel', {
             me.collapseDirection = me.collapseDirection || me.headerPosition || 'top';
             me.collapseTool = me.expandTool = Ext.widget({
                 xtype: 'tool',
-                type: (me.collapsed && !me.isPlaceHolderCollapse()) ? ('expand-' + me.getOppositeDirection(me.collapseDirection)) : ('collapse-' + me.collapseDirection),
                 handler: me.toggleCollapse,
                 scope: me
             });
 
+            me.updateCollapseTool();
             // Prepend collapse tool is configured to do so.
             if (me.collapseFirst) {
                 me.tools.unshift(me.collapseTool);
@@ -1003,6 +1124,19 @@ Ext.define('Ext.panel.Panel', {
      */
     addTools: Ext.emptyFn,
 
+    updateCollapseTool: function () {
+        var me = this,
+            collapseTool = me.collapseTool;
+    
+        if (collapseTool) {
+            if (me.collapsed && !me.isPlaceHolderCollapse()) {
+                collapseTool.setType('expand-' + me.getOppositeDirection(me.collapseDirection));
+            } else {
+                collapseTool.setType('collapse-' + me.collapseDirection);
+            }
+        }
+    },
+
     /**
      * Closes the Panel. By default, this method, removes it from the DOM, {@link Ext.Component#method-destroy destroy}s the
      * Panel object and all its descendant Components. The {@link #beforeclose beforeclose} event is fired before the
@@ -1034,7 +1168,7 @@ Ext.define('Ext.panel.Panel', {
             title = me.title,
             tools = me.tools,
             icon = me.icon || me.iconCls,
-            vertical = me.headerPosition == 'left' || me.headerPosition == 'right';
+            vertical = me.headerPosition === 'left' || me.headerPosition === 'right';
 
         if (Ext.isObject(header) || (header !== false && (force || (title || icon) || (tools && tools.length) || (me.collapsible && !me.titleCollapse)))) {
             if (header && header.isHeader) {
@@ -1050,6 +1184,7 @@ Ext.define('Ext.panel.Panel', {
                     textCls     : me.headerTextCls,
                     iconCls     : me.iconCls,
                     icon        : me.icon,
+                    glyph       : me.glyph,
                     baseCls     : me.baseCls + '-header',
                     tools       : tools,
                     ui          : me.ui,
@@ -1123,7 +1258,7 @@ Ext.define('Ext.panel.Panel', {
         var me = this;
         if (me.collapsed && me.isPlaceHolderCollapse()) {
             // force hidden back to true, since this gets set by the layout
-            me.hidden = true;
+            me.setHiddenState(true);
             me.placeholderCollapse();
         } else {
             me.callParent(arguments);
@@ -1145,7 +1280,7 @@ Ext.define('Ext.panel.Panel', {
 
     /**
      * Add tools to this panel
-     * @param {Object[]/Ext.panel.Tool[]} The tools to add
+     * @param {Object[]/Ext.panel.Tool[]} tools The tools to add
      */
     addTool: function(tools) {
         if (!Ext.isArray(tools)) {
@@ -1160,6 +1295,7 @@ Ext.define('Ext.panel.Panel', {
 
         for (t = 0; t < tLen; t++) {
             tool = tools[t];
+            tool.toolOwner = me;
             
             if (header && header.isHeader) {
                 header.addTool(tool);
@@ -1205,12 +1341,12 @@ Ext.define('Ext.panel.Panel', {
 
     collapsedHorizontal: function () {
         var dir = this.getCollapsed();
-        return dir == 'left' || dir == 'right';
+        return dir === 'left' || dir === 'right';
     },
 
     collapsedVertical: function () {
         var dir = this.getCollapsed();
-        return dir == 'top' || dir == 'bottom';
+        return dir === 'top' || dir === 'bottom';
     },
 
     restoreDimension: function(){
@@ -1274,7 +1410,7 @@ Ext.define('Ext.panel.Panel', {
             comp, i;
             
         // never use the header if we're in collapseMode mini
-        if (me.collapseMode == 'mini') {
+        if (me.collapseMode === 'mini') {
             return;
         }
 
@@ -1287,7 +1423,7 @@ Ext.define('Ext.panel.Panel', {
                 for (i = 0; i < dockedItemCount; i++) {
                     comp = dockedItems[i];
                     if (!comp.hidden) {
-                        if (comp.isHeader && (!comp.dock || comp.dock == 'top' || comp.dock == 'bottom')) {
+                        if (comp.isHeader && (!comp.dock || comp.dock === 'top' || comp.dock === 'bottom')) {
                             return comp;
                         }
                     }
@@ -1302,7 +1438,7 @@ Ext.define('Ext.panel.Panel', {
                 for (i = 0; i < dockedItemCount; i++) {
                     comp = dockedItems[i];
                     if (!comp.hidden) {
-                        if (comp.isHeader && (comp.dock == 'left' || comp.dock == 'right')) {
+                        if (comp.isHeader && (comp.dock === 'left' || comp.dock === 'right')) {
                             return comp;
                         }
                     }
@@ -1325,7 +1461,8 @@ Ext.define('Ext.panel.Panel', {
         // We did not find a Header of the required orientation: create one.
             me.reExpander = reExpander = me.createReExpander(collapseDir, {
                 dock: collapseDir,
-                cls: Ext.baseCSSPrefix + 'docked ' + me.baseCls + '-' + me.ui + '-collapsed'
+                cls: Ext.baseCSSPrefix + 'docked ' + me.baseCls + '-' + me.ui + '-collapsed',
+                isCollapsedExpander: true
             });
 
             me.dockedItems.insert(0, reExpander);
@@ -1335,43 +1472,49 @@ Ext.define('Ext.panel.Panel', {
 
     createReExpander: function(direction, defaults) {
         var me = this,
-            isLeft = direction == 'left',
-            isRight = direction == 'right',
+            isLeft = direction === 'left',
+            isRight = direction === 'right',
             isVertical = isLeft || isRight,
-            toolAtTop,
             result = Ext.apply({
                 hideMode: 'offsets',
-                title: me.title,
+                title: me.title || '&#160;',
+                titleAlign: me.titleAlign,
                 orientation: isVertical ? 'vertical' : 'horizontal',
                 textCls: me.headerTextCls,
                 icon: me.icon,
                 iconCls: me.iconCls,
-                baseCls: me.baseCls + '-header',
+                glyph: me.glyph,
+                baseCls: me.self.prototype.baseCls + '-header',
                 ui: me.ui,
                 frame: me.frame && me.frameHeader,
                 ignoreParentFrame: me.frame || me.overlapHeader,
                 indicateDrag: me.draggable,
                 collapseImmune: true,
                 ownerCt: me.ownerCt,
-                ownerLayout: me.componentLayout
+                ownerLayout: me.componentLayout,
+                margin: me.margin
             }, defaults);
             
-            // If we're in mini mode, set the placeholder size to only 1px since
-            // we don't need it to show up.
-            if (me.collapseMode == 'mini') {
-                if (isVertical) {
-                    result.width = 1;
-                } else {
-                    result.height = 1;
-                }
+        // If we're in mini mode, set the placeholder size to only 1px since
+        // we don't need it to show up.
+        if (me.collapseMode === 'mini') {
+            if (isVertical) {
+                result.width = 1;
+            } else {
+                result.height = 1;
             }
+        }
 
         // Create the re expand tool
         // For UI consistency reasons, collapse:left reExpanders, and region: 'west' placeHolders
         // have the re expand tool at the *top* with a bit of space.
         if (!me.hideCollapseTool) {
-            toolAtTop = isLeft || (isRight && me.isPlaceHolderCollapse());
-            result[toolAtTop ? 'items' : 'tools'] = [{
+            if (isLeft || (isRight && me.isPlaceHolderCollapse())) {
+                // adjust the title position if the collapse tool needs to be at the
+                // top of a vertical header
+                result.titlePosition = 1;
+            }
+            result.tools = [{
                 xtype: 'tool',
                 type: 'expand-' + me.getOppositeDirection(direction),
                 uiCls: ['top'],
@@ -1503,7 +1646,9 @@ Ext.define('Ext.panel.Panel', {
 
                 // Ensure that the reExpander has the correct framing applied.
                 if (header.rendered) {
+                    header.expanding = true;
                     header.updateFrame();
+                    delete header.expanding;
                 }
             } else {
                 // We've been using a temporary reExpander: hide it.
@@ -1574,9 +1719,15 @@ Ext.define('Ext.panel.Panel', {
         // uses the animCollapse property to determine if the collapse/expand should be animated
         me.animCollapse = animate;
 
-        // Flag used by the layouy ContextItem to impose an animation policy based upon the
+        // Flag used by the layout ContextItem to impose an animation policy based upon the
         // collapse direction and the animCollapse setting.
         me.isCollapsingOrExpanding = flags;
+
+        // The x-animating-size class sets overflow:hidden so that overflowing
+        // content is clipped during animation.
+        if (animate) {
+            me.addCls(Ext.baseCSSPrefix + 'animating-size');
+        }
 
         if (ownerLayout && !animate) {
             ownerLayout.onContentChange(me);
@@ -1603,8 +1754,12 @@ Ext.define('Ext.panel.Panel', {
             ownerLayout = me.ownerLayout;
 
         me.isCollapsingOrExpanding = 0;
-        if (me.collapseTool) {
-            me.collapseTool.setType('expand-' + me.getOppositeDirection(me.collapseDirection));
+        me.updateCollapseTool();
+
+        // The x-animating-size class sets overflow:hidden so that overflowing
+        // content is clipped during animation.
+        if (animated) {
+            me.removeCls(Ext.baseCSSPrefix + 'animating-size');
         }
 
         if (ownerLayout && animated) {
@@ -1694,13 +1849,13 @@ Ext.define('Ext.panel.Panel', {
             ownerCt = me.ownerCt,
             collapseDir = direction || me.collapseDirection,
             floatCls = Ext.baseCSSPrefix + 'border-region-slide-in',
-            placeholder = me.getPlaceholder(direction),
+            placeholder = me.getPlaceholder(collapseDir),
             slideInDirection;
 
         me.isCollapsingOrExpanding = 1;
 
         // Upcoming layout run will ignore this Component
-        me.hidden = true;
+        me.setHiddenState(true);
         me.collapsed = collapseDir;
 
         if (placeholder.rendered) {
@@ -1789,7 +1944,7 @@ Ext.define('Ext.panel.Panel', {
         placeholder.el.hide();
         placeholder.hidden = true;
         me.el.show();
-        me.hidden = false;
+        me.setHiddenState(false);
         me.collapsed = false;
         layoutOwner.updateLayout();
         myBox = me.getBox(false, true);
@@ -1798,7 +1953,7 @@ Ext.define('Ext.panel.Panel', {
         placeholder.el.show();
         placeholder.hidden = false;
         me.el.hide();
-        me.hidden = true;
+        me.setHiddenState(true);
         me.collapsed = collapsed;
         layoutOwner.updateLayout();
 
@@ -1835,7 +1990,8 @@ Ext.define('Ext.panel.Panel', {
         // Remember how we are really collapsed so we can restore it, but also so we can
         // become a layoutRoot while we are floated:
         me.floatedFromCollapse = me.collapsed;
-        me.collapsed = me.hidden = false;
+        me.collapsed = false;
+        me.setHiddenState(false);
 
         me.el.slideIn(slideDirection, {
             preserveScroll: true,
@@ -1906,7 +2062,7 @@ Ext.define('Ext.panel.Panel', {
             el = me.el;
 
         me.collapsed = me.floatedFromCollapse;
-        me.hidden = true;
+        me.setHiddenState(true);
         me.floatedFromCollapse = null;
 
         // Remove mouse leave/enter monitors
@@ -1926,6 +2082,7 @@ Ext.define('Ext.panel.Panel', {
         if (me.collapseTool) {
             me.collapseTool.el.show();
         }
+        me.slideOutTask.cancel();
         me.isSliding = false;
         me.fireEvent('unfloat', me);
     },
@@ -1997,7 +2154,8 @@ Ext.define('Ext.panel.Panel', {
             Ext.suspendLayouts();
             me.placeholder.hide();
             me.el.show();
-            me.hidden = me.collapsed = false;
+            me.collapsed = false;
+            me.setHiddenState(false);
 
             // Stop the center region from moving when layed out without the placeholder there.
             // Unless we are expanding from a floated out situation. In that case, it's layed out immediately.
@@ -2044,7 +2202,7 @@ Ext.define('Ext.panel.Panel', {
                 me.placeholder.hidden = false;
 
                 // Slide this Component's el back into place, after which we lay out AGAIN
-                me.hidden = false;
+                me.setHiddenState(false);
                 me.el.slideIn(me.convertCollapseDir(collapseDir), {
                     preserveScroll: true,
                     duration: Ext.Number.from(animate, Ext.fx.Anim.prototype.duration),
@@ -2070,6 +2228,7 @@ Ext.define('Ext.panel.Panel', {
 
         } else {
             me.floated = me.collapsed = false;
+            me.el.removeCls(floatCls);
             Ext.suspendLayouts();
             me.placeholder.hide();
             me.show();
@@ -2093,8 +2252,12 @@ Ext.define('Ext.panel.Panel', {
             ownerLayout = me.ownerLayout;
 
         me.isCollapsingOrExpanding = 0;
-        if (me.collapseTool) {
-            me.collapseTool.setType('collapse-' + me.collapseDirection);
+        me.updateCollapseTool();
+
+        // The x-animating-size class sets overflow:hidden so that overflowing
+        // content is clipped during animation.
+        if (animated) {
+            me.removeCls(Ext.baseCSSPrefix + 'animating-size');
         }
 
         if (ownerLayout && animated) {
@@ -2120,7 +2283,7 @@ Ext.define('Ext.panel.Panel', {
         } else if (border === true) {
             border = '1px';
         } else {
-            border = Ext.Element.unitizeBox(border);
+            border = me.unitizeBox(border);
         }
         
         if (header) {
@@ -2155,18 +2318,79 @@ Ext.define('Ext.panel.Panel', {
     },
 
     // @private
-    initDraggable : function(){
-        /**
-         * @property {Ext.dd.DragSource} dd
-         * If this Panel is configured {@link #cfg-draggable}, this property will contain an instance of {@link
-         * Ext.dd.DragSource} which handles dragging the Panel.
-         *
-         * The developer must provide implementations of the abstract methods of {@link Ext.dd.DragSource} in order to
-         * supply behaviour for each stage of the drag/drop process. See {@link #cfg-draggable}.
-         */
-        this.dd = new Ext.panel.DD(this, Ext.isBoolean(this.draggable) ? null : this.draggable);
+    initDraggable : function() {
+        
+        // For just simple dragging like Windows
+        if (this.simpleDrag) {
+            this.initSimpleDraggable();
+        }
+        // For DD package aware dragging of Panels
+        else {
+            /**
+             * @property {Ext.dd.DragSource/Ext.util.ComponentDragger} dd
+             *
+             * Only present if this Panel has been configured with {@link #cfg-draggable} `true`.
+             *
+             * ##Simple dragging##
+             *
+             * If this Panel is configured {@link #cfg-simpleDrag} `true` (the default is `false`), this property
+             * will reference an instance of {@link Ext.util.ComponentDragger} (A subclass of
+             * {@link Ext.dd.DragTracker DragTracker}) which handles moving the Panel's DOM Element,
+             * and constraining according to the {@link #constrain} and {@link #constrainHeader} .
+             *
+             * This object fires various events during its lifecycle and during a drag operation.
+             * 
+             * ##Complex dragging interacting with other DragDrop instances##
+             *
+             * By default, this property in a {@link #cfg-draggable} Panel will contain an instance of {@link
+             * Ext.dd.DragSource} which handles dragging the Panel.
+             *
+             * The developer must provide implementations of the abstract methods of {@link Ext.dd.DragSource} in order to
+             * supply behaviour for each stage of the drag/drop process. See {@link #cfg-draggable}.
+             */
+            this.dd = new Ext.panel.DD(this, Ext.isBoolean(this.draggable) ? null : this.draggable);
+        }
     },
 
+    /**
+     * @private
+     * Override Component.initDraggable.
+     * Panel (and subclasses) use the header element as the delegate.
+     */
+    initSimpleDraggable: function() {
+        var me = this,
+            ddConfig, dd;
+
+        if (!me.header) {
+            me.updateHeader(true);
+        }
+
+        /*
+         * Check the header here again. If for whatever reason it wasn't created in
+         * updateHeader (we were configured with header: false) then we'll just ignore the rest since the
+         * header acts as the drag handle.
+         */
+        if (me.header) {
+            ddConfig = Ext.applyIf({
+                el: me.el,
+                delegate: '#' + Ext.escapeId(me.header.id)
+            }, me.draggable);
+
+            // Add extra configs if Window is specified to be constrained
+            if (me.constrain || me.constrainHeader) {
+                ddConfig.constrain = me.constrain;
+                ddConfig.constrainDelegate = me.constrainHeader;
+                ddConfig.constrainTo = me.constrainTo || me.container;
+            }
+
+            dd = me.dd = new Ext.util.ComponentDragger(this, ddConfig);
+            me.relayEvents(dd, ['dragstart', 'drag', 'dragend']);
+            if (me.maximized) {
+                dd.disable();
+            }
+        }
+    },
+    
     // @private
     // helper function for ghost
     ghostTools : function() {
@@ -2226,7 +2450,7 @@ Ext.define('Ext.panel.Panel', {
         me.ghostPanel.hidden = false;
         ghostPanel.floatParent = me.floatParent;
         if (me.floating) {
-            ghostPanel.setZIndex(Ext.Number.from(me.el.getStyle('zIndex'), 0));
+            ghostPanel.zIndexManager.assignZIndices();
         } else {
             ghostPanel.toFront();
         }
@@ -2240,7 +2464,15 @@ Ext.define('Ext.panel.Panel', {
             }
             ghostPanel.addTool(me.ghostTools());
             ghostPanel.setTitle(me.title);
-            ghostPanel.setIconCls(me.iconCls);
+
+            if (me.iconCls) {
+                ghostPanel.setIconCls(me.iconCls);
+            } else if (me.icon) {
+                ghostPanel.setIcon(me.icon);
+            } else if (me.glyph) {
+                ghostPanel.setGlyph(me.glyph);
+            }
+            
             ghostPanel.header.addCls(Ext.baseCSSPrefix + 'header-ghost');
         }
 

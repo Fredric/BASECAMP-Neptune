@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * @private
@@ -29,19 +29,19 @@ Ext.define('Ext.tree.ViewDropZone', {
     allowParentInserts: false,
  
     /**
-     * @cfg {String} allowContainerDrop
+     * @cfg {Boolean} allowContainerDrop
      * True if drops on the tree container (outside of a specific tree node) are allowed.
      */
     allowContainerDrops: false,
 
     /**
-     * @cfg {String} appendOnly
+     * @cfg {Boolean} appendOnly
      * True if the tree should only allow append drops (use for trees which are sorted).
      */
     appendOnly: false,
 
     /**
-     * @cfg {String} expandDelay
+     * @cfg {Number} expandDelay
      * The delay in milliseconds to wait before expanding a target tree node while dragging a droppable node
      * over the target.
      */
@@ -214,12 +214,12 @@ Ext.define('Ext.tree.ViewDropZone', {
 
     handleNodeDrop : function(data, targetNode, position) {
         var me = this,
-            view = me.view,
-            parentNode = targetNode ? targetNode.parentNode : view.panel.getRootNode(),
-            Model = view.getStore().treeStore.model,
+            targetView = me.view,
+            parentNode = targetNode ? targetNode.parentNode : targetView.panel.getRootNode(),
+            Model = targetView.getStore().treeStore.model,
             records, i, len, record,
             insertionMethod, argList,
-            needTargetExpand, recParent,
+            needTargetExpand,
             transferData;
 
         // If the copy flag is set, create a copy of the models
@@ -232,7 +232,7 @@ Ext.define('Ext.tree.ViewDropZone', {
                     data.records.push(record.copy(undefined, true));
                 } else {
                     // If it's not a node, make a node copy
-                    data.records.push(new Model(record[record.persistenceProperty], record.getId()));
+                    data.records.push(new Model(record.data, record.getId()));
                 }
             }
         }
@@ -276,9 +276,20 @@ Ext.define('Ext.tree.ViewDropZone', {
             // Coalesce layouts caused by node removal, appending and sorting
             Ext.suspendLayouts();
 
+            targetView.getSelectionModel().clearSelections();
+
             // Insert the records into the target node
             for (i = 0, len = data.records.length; i < len; i++) {
-                argList[0] = data.records[i];
+                record = data.records[i];
+                if (!record.isNode) {
+                    if (record.isModel) {
+                        record = new Model(record.data, record.getId());
+                    } else {
+                        record = new Model(record);
+                    }
+                    data.records[i] = record;
+                }
+                argList[0] = record;
                 insertionMethod.apply(targetNode, argList);
             }
 
@@ -296,24 +307,13 @@ Ext.define('Ext.tree.ViewDropZone', {
                 color = me.dropHighlightColor;
 
                 for (i = 0; i < len; i++) {
-                    n = view.getNode(data.records[i]);
+                    n = targetView.getNode(data.records[i]);
                     if (n) {
                         Ext.fly(n).highlight(color);
                     }
                 }
             }
         };
-
-        // Remove nodes from their current place in case there's a delay while the target node loads
-        view.getSelectionModel().clearSelections();
-        for (i = 0, len = data.records.length; i < len; i++) {
-            record = data.records[i];
-            // If we're dragging from a non-tree source we might not have a parent yet
-            recParent = record.parentNode;
-            if (recParent) {
-                recParent.removeChild(record);
-            }
-        }
 
         // If dropping right on an unexpanded node, transfer the data after it is expanded.
         if (needTargetExpand) {

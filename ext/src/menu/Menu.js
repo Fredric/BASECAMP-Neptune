@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * A menu object. This is the container to which you may add {@link Ext.menu.Item menu items}.
@@ -243,11 +243,10 @@ Ext.define('Ext.menu.Menu', {
             if (me.minWidth === undefined) {
                 me.minWidth = me.defaultMinWidth;
             }
-        }
-
-        // hidden defaults to false if floating is configured as false
-        else {
+        } else {
+            // hidden defaults to false if floating is configured as false
             me.hidden = !!me.initialConfig.hidden;
+            me.constrain = false;
         }
 
         me.callParent(arguments);
@@ -550,27 +549,29 @@ Ext.define('Ext.menu.Menu', {
         return me;
     },
 
-    show: function() {
+    beforeShow: function() {
         var me = this,
-            parentEl, viewHeight,
-            maxWas = me.maxHeight;
+            viewHeight;
 
-        // we need to get scope parent for height constraint
-        if (!me.rendered){
-            me.doAutoRender();
-        }
-
-        // constrain the height to the curren viewable area
+        // Constrain the height to the containing element's viewable area
         if (me.floating) {
-            //if our reset css is scoped, there will be a x-reset wrapper on this menu which we need to skip
-            parentEl = me.el.parent();
-            viewHeight = parentEl.getViewSize().height;
-            me.maxHeight  =  Math.min(maxWas || viewHeight, viewHeight);
+            me.savedMaxHeight = me.maxHeight;
+            viewHeight = me.container.getViewSize().height;
+            me.maxHeight = Math.min(me.maxHeight || viewHeight, viewHeight);
         }
 
         me.callParent(arguments);
-        me.maxHeight = maxWas;
-        return me;
+    },
+
+    afterShow: function() {
+        var me = this;
+
+        me.callParent(arguments);
+
+        // Restore configured maxHeight
+        if (me.floating) {
+            me.maxHeight = me.savedMaxHeight;
+        }
     },
 
     // @private

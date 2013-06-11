@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * @docauthor Jason Johnston <jason@sencha.com>
@@ -335,6 +335,8 @@ Ext.define('Ext.form.field.Base', {
         if (me.readOnly) {
             me.addCls(me.readOnlyCls);
         }
+        
+        me.addCls(Ext.baseCSSPrefix + 'form-type-' + me.inputType);
     },
 
     /**
@@ -380,6 +382,10 @@ Ext.define('Ext.form.field.Base', {
         var me = this;
 
         me.callParent();
+
+        // This is added here rather than defined in Ext.form.Labelable since inputEl isn't related to Labelable.
+        // It's important to add inputEl to the childEls so it can be properly destroyed.
+        me.addChildEls('inputEl');
 
         /**
          * @property {Ext.Element} inputEl
@@ -658,11 +664,6 @@ Ext.define('Ext.form.field.Base', {
             eLen   = events.length,
             event;
 
-        // standardise buffer across all browsers + OS-es for consistent event order.
-        // (the 10ms buffer for Editors fixes a weird FF/Win editor issue when changing OS window focus)
-        if (me.inEditor) {
-            me.onBlur = Ext.Function.createBuffered(me.onBlur, 10);
-        }
         if (inputEl) {
             me.mon(inputEl, Ext.EventManager.getKeyEvent(), me.fireKey,  me);
 

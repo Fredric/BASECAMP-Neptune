@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * A layout that arranges items vertically down a Container. This layout optionally divides available vertical space
@@ -72,6 +72,11 @@ Ext.define('Ext.layout.container.VBox', {
      * - **stretchmax** : child items are stretched horizontally to the size of the largest item.
      */
     align : 'left', // left, center, stretch, strechmax
+
+    /**
+     * @cfg {"round"/"floor"/"ceil"} [alignRoundingMethod='round'] The Math method to use
+     * for rounding fractional pixels when `{@link #align}:center` is used.
+     */
     
     /**
      * @cfg {Boolean} constrainAlign
@@ -90,6 +95,9 @@ Ext.define('Ext.layout.container.VBox', {
     names: {
         // parallel
         beforeX: 'top',
+        beforeScrollX: 'top',
+        beforeScrollerSuffix: '-before-scroller',
+        afterScrollerSuffix: '-after-scroller',
         leftCap: 'Top',
         afterX: 'bottom',
         width: 'height',
@@ -118,7 +126,6 @@ Ext.define('Ext.layout.container.VBox', {
         heightModel: 'widthModel',
         heightIndex: 0,
         y: 'x',
-        scrollTop: 'scrollLeft',
         overflowY: 'overflowX',
         hasOverflowY: 'hasOverflowX',
         invalidateScrollY: 'invalidateScrollX',
@@ -134,7 +141,10 @@ Ext.define('Ext.layout.container.VBox', {
         setContentWidth: 'setContentHeight',
         setContentHeight: 'setContentWidth',
         setWidthInDom: 'setHeightInDom',
-        setHeightInDom: 'setWidthInDom'
+        setHeightInDom: 'setWidthInDom',
+        getScrollLeft: 'getScrollTop',
+        setScrollLeft: 'setScrollTop',
+        scrollTo: 'scrollTo'
     },
 
     sizePolicy: {

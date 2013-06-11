@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * Component layout for buttons
@@ -76,6 +76,7 @@ Ext.define('Ext.layout.component.Button', {
             btnElContext = ownerContext.btnElContext,
             btnInnerElContext = ownerContext.btnInnerElContext,
             btnWrapContext = ownerContext.btnWrapContext,
+            mmax = Math.max,
             ownerHeight, contentHeight, btnElHeight, innerElHeight;
 
         me.callParent(arguments);
@@ -101,6 +102,7 @@ Ext.define('Ext.layout.component.Button', {
             // inner elements to fit.
             ownerHeight = ownerContext.getProp('height');
 
+            // If height is 0, skip out all this
             if (ownerHeight) {
                 // contentHeight is the total available height inside the button's padding
                 // and framing
@@ -121,13 +123,13 @@ Ext.define('Ext.layout.component.Button', {
                 // but it must be adjusted by the icon size if the button has a top
                 // or bottom icon.
                 innerElHeight = btnElHeight;
-                if ((owner.icon || owner.iconCls) &&
+                if ((owner.icon || owner.iconCls || owner.glyph) &&
                     (owner.iconAlign === 'top' || owner.iconAlign === 'bottom')) {
                     innerElHeight -= btnInnerElContext.getPaddingInfo().height;
                 }
 
-                btnWrapContext.setProp('height', contentHeight);
-                btnElContext.setProp('height', btnElHeight);
+                btnWrapContext.setProp('height', mmax(0, contentHeight));
+                btnElContext.setProp('height', mmax(0, btnElHeight));
                 // ensure the button's text is vertically centered
                 if (ownerContext.isHtmlText) {
                     // if the button text contains html it must be vertically centered
@@ -137,10 +139,11 @@ Ext.define('Ext.layout.component.Button', {
                     // if the button text does not contain html we can just center it
                     // using line-height to avoid the extra measurement that happens
                     // inside of centerInnerEl() since multi-line text is not a possiblity
-                    btnInnerElContext.setProp('line-height', innerElHeight + 'px');
+                    btnInnerElContext.setProp('line-height', mmax(0, innerElHeight) + 'px');
                 }
                 me.ieCenterIcon(ownerContext, btnElHeight);
-            } else {
+            } else if (ownerHeight !== 0) {
+                // Only fail if height was undefined, since it could be 0
                 me.done = false;
             }
         }

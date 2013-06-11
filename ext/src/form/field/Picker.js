@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * An abstract class for fields that have a single trigger which opens a "picker" popup below the field, e.g. a combobox
@@ -158,6 +158,7 @@ Ext.define('Ext.form.field.Picker', {
             bodyEl, picker, collapseIf;
 
         if (me.rendered && !me.isExpanded && !me.isDestroyed) {
+            me.expanding = true;
             bodyEl = me.bodyEl;
             picker = me.getPicker();
             collapseIf = me.collapseIf;
@@ -177,6 +178,7 @@ Ext.define('Ext.form.field.Picker', {
             Ext.EventManager.onWindowResize(me.alignPicker, me);
             me.fireEvent('expand', me);
             me.onExpand();
+            delete me.expanding;
         }
     },
 
@@ -211,7 +213,9 @@ Ext.define('Ext.form.field.Picker', {
             aboveSfx = '-above',
             isAbove;
 
-        me.picker.alignTo(me.bodyEl, me.pickerAlign, me.pickerOffset);
+        // Align to the trigger wrap because the border isn't always on the input element, which
+        // can cause the offset to be off
+        me.picker.alignTo(me.triggerWrap, me.pickerAlign, me.pickerOffset);
         // add the {openCls}-above class if the picker was aligned above
         // the field due to hitting the bottom of the viewport
         isAbove = picker.el.getY() < me.inputEl.getY();

@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * Slider which supports vertical or horizontal orientation, keyboard adjustments, configurable snapping, axis clicking
@@ -286,12 +286,6 @@ Ext.define('Ext.slider.Multi', {
              */
             'dragend'
         );
-
-        // Ensure that the maxValue is a snap point, and that the initial value is snapped.
-        if (me.increment) {
-            me.maxValue = Ext.Number.snapInRange(me.maxValue, me.increment, me.minValue);
-            me.value = me.normalizeValue(me.value);
-        }
 
         me.callParent();
 
@@ -577,10 +571,9 @@ Ext.define('Ext.slider.Multi', {
      */
     normalizeValue : function(v) {
         var me = this,
-            Num = Ext.Number,
-            snapFn = Num[me.zeroBasedSnapping ? 'snap' : 'snapInRange'];
+            snapFn = me.zeroBasedSnapping ? 'snap' : 'snapInRange';
 
-        v = snapFn.call(Num, v, me.increment, me.minValue, me.maxValue);
+        v = Ext.Number[snapFn](v, me.increment, me.minValue, me.maxValue);
         v = Ext.util.Format.round(v, me.decimalPrecision);
         v = Ext.Number.constrain(v, me.minValue, me.maxValue);
         return v;
@@ -593,19 +586,20 @@ Ext.define('Ext.slider.Multi', {
      */
     setMinValue : function(val) {
         var me = this,
-            i = 0,
             thumbs = me.thumbs,
             len = thumbs.length,
-            t;
+            thumb, i;
 
         me.minValue = val;
         if (me.rendered) {
             me.inputEl.dom.setAttribute('aria-valuemin', val);
         }
 
-        for (; i < len; ++i) {
-            t = thumbs[i];
-            t.value = t.value < val ? val : t.value;
+        for (i = 0; i < len; ++i) {
+            thumb = thumbs[i];
+            if (thumb.value < val) {
+                me.setValue(i, val, false);    
+            }
         }
         me.syncThumbs();
     },
@@ -617,19 +611,20 @@ Ext.define('Ext.slider.Multi', {
      */
     setMaxValue : function(val) {
         var me = this,
-            i = 0,
             thumbs = me.thumbs,
             len = thumbs.length,
-            t;
+            thumb, i;
 
         me.maxValue = val;
         if (me.rendered) {
             me.inputEl.dom.setAttribute('aria-valuemax', val);
         }
 
-        for (; i < len; ++i) {
-            t = thumbs[i];
-            t.value = t.value > val ? val : t.value;
+        for (i = 0; i < len; ++i) {
+            thumb = thumbs[i];
+            if (thumb.value > val) {
+                me.setValue(i, val, false);
+            }
         }
         me.syncThumbs();
     },

@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * Simple header class which is used for on {@link Ext.panel.Panel} and {@link Ext.window.Window}.
@@ -36,8 +36,8 @@ Ext.define('Ext.panel.Header', {
     /**
      * @cfg {String} [titleAlign]
      * The alignment of the title text within the available space between the
-     * icon and the tools. 
-     * 
+     * icon and the tools.
+     *
      * May be `"left"`, `"right"` or `"center"`. Defaults to the browser's natural
      * behavior depending on the css direction property - `"left"` when direction
      * is ltr  and `"right"` when direction is rtl
@@ -58,7 +58,7 @@ Ext.define('Ext.panel.Header', {
 
     headingTpl: [
         // unselectable="on" is required for Opera, other browsers inherit unselectability from the header
-        '<span id="{id}-textEl" class="{headerCls}-text {cls}-text" unselectable="on">{title}</span>'
+        '<span id="{id}-textEl" class="{headerCls}-text {cls}-text {cls}-text-{ui}" unselectable="on">{title}</span>'
     ],
 
     shrinkWrap: 3,
@@ -69,34 +69,60 @@ Ext.define('Ext.panel.Header', {
      */
 
     /**
+     * @cfg {Number} [titlePosition]
+     * The ordinal position among the header items (tools and other components specified using the {@link #cfg-items} config)
+     * at which the title component is inserted. See {@link Ext.panel.Panel#cfg-header Panel's header config}.
+     *
+     * If not specified, the title is inserted after any {@link #cfg-items}, but *before* any {@link Ext.panel.Panel#tools}.
+     *
+     * Note that if an {@link #icon} or {@link #iconCls} has been configured, then the icon component will be the
+     * first item before all specified tools or {@link #cfg-items}. This configuration does not include the icon.
+     */
+    titlePosition: 0,
+
+    /**
      * @cfg {String} iconCls
      * CSS class for an icon in the header. Used for displaying an icon to the left of a title.
      */
-    
+
     /**
      * @cfg {String} icon
      * Path to image for an icon in the header. Used for displaying an icon to the left of a title.
+     */
+
+    /**
+     * @cfg {Number/String} glyph
+     * A numeric unicode character code to use as the icon for the panel header. The
+     * default font-family for glyphs can be set globally using
+     * {@link Ext#setGlyphFontFamily Ext.setGlyphFontFamily()}. Alternatively, this
+     * config option accepts a string with the charCode and font-family separated by the
+     * `@` symbol. For example '65@My Font Family'.
      */
 
     // a class for styling that is shared between panel and window headers
     headerCls: Ext.baseCSSPrefix + 'header',
 
     initComponent: function() {
-        var me = this;
-            
+        var me = this,
+            hasPosition = me.hasOwnProperty('titlePosition'),
+            items = me.items,
+            titlePosition = hasPosition ? me.titlePosition : (items ? items.length : 0),
+            uiClasses = [me.orientation, me.getDockName()],
+            ownerCt = me.ownerCt;
+
         me.addEvents(
             /**
              * @event click
-             * Fires when the header is clicked. This event will not be fired 
+             * Fires when the header is clicked. This event will not be fired
              * if the click was on a {@link Ext.panel.Tool}
              * @param {Ext.panel.Header} this
              * @param {Ext.EventObject} e
              */
             'click',
-            
+
             /**
              * @event dblclick
-             * Fires when the header is double clicked. This event will not 
+             * Fires when the header is double clicked. This event will not
              * be fired if the click was on a {@link Ext.panel.Tool}
              * @param {Ext.panel.Header} this
              * @param {Ext.EventObject} e
@@ -107,11 +133,14 @@ Ext.define('Ext.panel.Header', {
         me.indicateDragCls = me.headerCls + '-draggable';
         me.title = me.title || '&#160;';
         me.tools = me.tools || [];
-        me.items = me.items ? Ext.Array.slice(me.items) : [];
+        items = me.items = (items ? Ext.Array.slice(items) : []);
         me.orientation = me.orientation || 'horizontal';
         me.dock = (me.dock) ? me.dock : (me.orientation == 'horizontal') ? 'top' : 'left';
 
-        me.addClsWithUI([ me.orientation, me.getDockName() ]);
+        if (ownerCt ? (!ownerCt.border && !ownerCt.frame) : !me.border) {
+            uiClasses.push(me.orientation + '-noborder');
+        }
+        me.addClsWithUI(uiClasses);
         me.addCls([me.headerCls, me.headerCls + '-' + me.orientation]);
 
         if (me.indicateDrag) {
@@ -119,9 +148,14 @@ Ext.define('Ext.panel.Header', {
         }
 
         // Add Icon
-        if (!Ext.isEmpty(me.iconCls) || !Ext.isEmpty(me.icon)) {
+        if (me.iconCls || me.icon || me.glyph) {
             me.initIconCmp();
-            me.items.push(me.iconCmp);
+            // If we didn't provide a position or items, the icon should
+            // appear before the title
+            if (!hasPosition && !items.length) {
+                ++titlePosition;
+            }
+            items.push(me.iconCmp);
         }
 
         // Add Title
@@ -130,6 +164,7 @@ Ext.define('Ext.panel.Header', {
             focusable : false,
             noWrap    : true,
             flex      : 1,
+            rtl       : me.rtl,
             id        : me.id + '_hd',
             style     : me.titleAlign ? ('text-align:' + me.titleAlign) : '',
             cls       : me.headerCls + '-text-container ' +
@@ -152,22 +187,31 @@ Ext.define('Ext.panel.Header', {
                 scope: me
             }
         });
-        me.layout = (me.orientation == 'vertical') ? { 
+        me.layout = (me.orientation == 'vertical') ? {
             type : 'vbox',
-            align: 'center'
+            align: 'center',
+            alignRoundingMethod: 'ceil'
         } : {
             type : 'hbox',
-            align: 'middle'
+            align: 'middle',
+            alignRoundingMethod: 'floor'
         };
-        me.items.push(me.titleCmp);
 
         // Add Tools
-        Ext.Array.push(me.items, me.tools);
+        Ext.Array.push(items, me.tools);
         // Clear the tools so we can have only the instances. Intentional mutation of passed in array
         // Owning code in Panel uses this array as its pubic tools property.
         me.tools.length = 0;
         me.callParent();
-        
+
+        if (items.length < titlePosition) {
+            titlePosition = items.length;
+        }
+        me.titlePosition = titlePosition;
+
+        // Insert the titleComponent at the specified position
+        me.insert(titlePosition, me.titleCmp);
+
         me.on({
             dblclick: me.onDblClick,
             click: me.onClick,
@@ -178,19 +222,28 @@ Ext.define('Ext.panel.Header', {
 
     initIconCmp: function() {
         var me = this,
-            cfg = {
-                focusable: false,
-                src: Ext.BLANK_IMAGE_URL,
-                cls: [me.headerCls + '-icon', me.baseCls + '-icon', me.iconCls],
-                id: me.id + '-iconEl',
-                iconCls: me.iconCls
-            };
-            
+            cls = [me.headerCls + '-icon', me.baseCls + '-icon', me.iconCls],
+            cfg;
+       
+        if (me.glyph) {
+            cls.push(me.baseCls + '-glyph');
+        }
+
+        cfg = {
+            focusable: false,
+            src: Ext.BLANK_IMAGE_URL,
+            cls: cls,
+            baseCls: me.baseCls + '-icon',
+            id: me.id + '-iconEl',
+            iconCls: me.iconCls,
+            glyph:  me.glyph
+        };
+
         if (!Ext.isEmpty(me.icon)) {
             delete cfg.iconCls;
             cfg.src = me.icon;
         }
-        
+
         me.iconCmp = new Ext.Img(cfg);
     },
 
@@ -223,6 +276,11 @@ Ext.define('Ext.panel.Header', {
                 me.el.repaint();
             }
         }
+    },
+
+    beforeLayout: function () {
+        this.callParent();
+        this.syncBeforeAfterTitleClasses();
     },
 
     adjustTitlePosition: function() {
@@ -365,16 +423,16 @@ Ext.define('Ext.panel.Header', {
     onClick: function(e) {
         this.fireClickEvent('click', e);
     },
-    
+
     onDblClick: function(e){
         this.fireClickEvent('dblclick', e);
     },
-    
+
     fireClickEvent: function(type, e){
         var toolCls = '.' + Ext.panel.Tool.prototype.baseCls;
         if (!e.getTarget(toolCls)) {
             this.fireEvent(type, this, e);
-        }    
+        }
     },
 
     getFocusEl: function() {
@@ -396,7 +454,7 @@ Ext.define('Ext.panel.Header', {
     setTitle: function(title) {
         var me = this,
             titleCmp = me.titleCmp;
-            
+
         me.title = title;
         if (titleCmp.rendered) {
             titleCmp.textEl.update(me.title || '&#160;');
@@ -456,7 +514,7 @@ Ext.define('Ext.panel.Header', {
         var me = this,
             isEmpty = !cls || !cls.length,
             iconCmp = me.iconCmp;
-        
+
         me.iconCls = cls;
         if (!me.iconCmp && !isEmpty) {
             me.initIconCmp();
@@ -472,7 +530,7 @@ Ext.define('Ext.panel.Header', {
             }
         }
     },
-    
+
     /**
      * Sets the image path that provides the icon image for this header.  This method will replace any existing
      * icon if one has already been set.
@@ -482,7 +540,7 @@ Ext.define('Ext.panel.Header', {
         var me = this,
             isEmpty = !icon || !icon.length,
             iconCmp = me.iconCmp;
-        
+
         me.icon = icon;
         if (!me.iconCmp && !isEmpty) {
             me.initIconCmp();
@@ -496,13 +554,36 @@ Ext.define('Ext.panel.Header', {
             }
         }
     },
-    
+
+     /**
+     * Sets glyph that provides the icon image for this header.  This method will replace any existing
+     * glyph if one has already been set.
+     * @param {Number/String} glyph the numeric charCode or string charCode/font-family.
+     * This parameter expects a format consistent with that of {@link #glyph}
+     */
+    setGlyph: function(glyph) {
+        var me = this,
+            iconCmp = me.iconCmp;
+        
+        if (!me.iconCmp) {
+            me.initIconCmp();
+            me.insert(0, me.iconCmp);
+        } else if (iconCmp) {
+            if (glyph) {
+                me.iconCmp.setGlyph(glyph);
+            } else {
+                me.iconCmp.destroy();
+                delete me.iconCmp;
+            }
+        }
+    },
+
     /**
      * Gets the tools for this header.
      * @return {Ext.panel.Tool[]} The tools
      */
     getTools: function(){
-        return this.tools.slice();    
+        return this.tools.slice();
     },
 
     /**
@@ -513,6 +594,41 @@ Ext.define('Ext.panel.Header', {
         // Even though the defaultType is tool, it may be changed,
         // so let's be safe and forcibly specify tool
         this.add(Ext.ComponentManager.create(tool, 'tool'));
+    },
+
+    syncBeforeAfterTitleClasses: function() {
+        var me = this,
+            items = me.items,
+            childItems = items.items,
+            titlePosition = me.titlePosition,
+            itemCount = childItems.length,
+            itemGeneration = items.generation,
+            syncGen = me.syncBeforeAfterGen,
+            afterCls, beforeCls, i, item;
+
+        if (syncGen === itemGeneration) {
+            return;
+        }
+        me.syncBeforeAfterGen = itemGeneration;
+
+        for (i = 0; i < itemCount; ++i) {
+            item = childItems[i];
+
+            afterCls  = item.afterTitleCls  || (item.afterTitleCls  = item.baseCls + '-after-title')
+            beforeCls = item.beforeTitleCls || (item.beforeTitleCls = item.baseCls + '-before-title')
+
+            if (!me.title || i < titlePosition) {
+                if (syncGen) {
+                    item.removeCls(afterCls);
+                } // else first time we won't need to remove anything...
+                item.addCls(beforeCls);
+            } else if (i > titlePosition) {
+                if (syncGen) {
+                    item.removeCls(beforeCls);
+                }
+                item.addCls(afterCls);
+            }
+        }
     },
 
     /**
@@ -545,5 +661,16 @@ Ext.define('Ext.panel.Header', {
 
     getDockName: function() {
         return this.dock;
+    },
+    
+    getFramingInfoCls: function(){
+        var me = this,
+            cls = me.callParent(),
+            owner = me.ownerCt;
+            
+        if (!me.expanding && (owner && owner.collapsed) || me.isCollapsedExpander) {
+            cls += '-' + owner.collapsedCls; 
+        }
+        return cls + '-' + me.dock;
     }
 });

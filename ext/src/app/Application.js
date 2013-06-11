@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * Represents an Ext JS 4 application, which is typically a single page app using a {@link Ext.container.Viewport Viewport}.
@@ -89,6 +89,7 @@ Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
  *
  *     Ext.define('MyApp.app.Application', {
  *         extend: 'Ext.app.Application',
+ *         name: 'MyApp',
  *         ...
  *     });
  *
@@ -110,11 +111,12 @@ Ext.define('Ext.app.Application', {
     /**
      * @cfg {String} name
      * The name of your application. This will also be the namespace for your views, controllers
-     * models and stores. Don't use spaces or special characters in the name.
+     * models and stores. Don't use spaces or special characters in the name. **Application name
+     * is mandatory**.
      */
 
     /**
-     * @cfg {String[]} controllers
+     * @cfg {String/String[]} controllers
      * Names of controllers that the app uses.
      */
 
@@ -157,7 +159,7 @@ Ext.define('Ext.app.Application', {
     appProperty: 'app',
 
     /**
-     * @cfg {String[]} [namespaces]
+     * @cfg {String/String[]} [namespaces]
      *
      * The list of namespace prefixes used in the application to resolve dependencies
      * like Views and Stores:
@@ -206,29 +208,50 @@ Ext.define('Ext.app.Application', {
     onClassExtended: function(cls, data, hooks) {
         var Controller = Ext.app.Controller,
             proto = cls.prototype,
-            namespace = data.name,
             requires = [],
-            onBeforeClassCreated, paths, ns;
-            
-        data.$namespace = data.name;
-        Ext.app.addNamespaces(data.name);
+            onBeforeClassCreated, paths, namespace, ns, appFolder;
+        
+        // Ordinary inheritance does not work here so we collect
+        // necessary data from current class data and its superclass
+        namespace = data.name      || cls.superclass.name;
+        appFolder = data.appFolder || cls.superclass.appFolder;
+        
+        if (namespace) {
+            data.$namespace = namespace;
+            Ext.app.addNamespaces(namespace);
+        }
 
         if (data.namespaces) {
             Ext.app.addNamespaces(data.namespaces);
         }
 
-        Ext.Loader.setPath(data.name, data.appFolder || 'app');
-        paths = data.paths;
+        if (!data['paths processed']) {
+            if (namespace && appFolder) {
+                Ext.Loader.setPath(namespace, appFolder);
+            }
+            
+            paths = data.paths;
 
-        if (paths) {
-            for (ns in paths) {
-                if (paths.hasOwnProperty(ns)) {
-                    Ext.Loader.setPath(ns, paths[ns]);
+            if (paths) {
+                for (ns in paths) {
+                    if (paths.hasOwnProperty(ns)) {
+                        Ext.Loader.setPath(ns, paths[ns]);
+                    }
                 }
             }
         }
+        else {
+            delete data['paths processed'];
+        }
 
         if (data.autoCreateViewport) {
+            //<debug>
+            if (!namespace) {
+                Ext.Error.raise("[Ext.app.Application] Can't resolve namespace for " +
+                                data.$className + ", did you forget to specify 'name' property?");
+            }
+            //</debug>
+            
             Controller.processDependencies(proto, requires, namespace, 'view', ['Viewport']);
         }
 
@@ -266,6 +289,8 @@ Ext.define('Ext.app.Application', {
         me.initNamespace();
         me.initControllers();
         me.onBeforeLaunch();
+        
+        me.finishInitControllers();
     },
 
     initNamespace: function() {
@@ -303,6 +328,17 @@ Ext.define('Ext.app.Application', {
 
         for (var i = 0, ln = controllers.length; i < ln; i++) {
             me.getController(controllers[i]);
+        }
+    },
+    
+    finishInitControllers: function() {
+        var me = this,
+            controllers, i, l;
+        
+        controllers = me.controllers.getRange();
+        
+        for (i = 0, l = controllers.length; i < l; i++) {
+            controllers[i].finishInit(me);
         }
     },
 

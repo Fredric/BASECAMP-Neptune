@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * This class manages state information for a component or element during a layout.
@@ -43,7 +43,7 @@ Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
  * @private
  */
 Ext.define('Ext.layout.ContextItem', {
-    
+
     requires: ['Ext.layout.ClassList'],
 
     heightModel: null,
@@ -149,20 +149,20 @@ Ext.define('Ext.layout.ContextItem', {
         me.styles = {};
 
         target = me.target;
-        
+
         if (!target.isComponent) {
             lastBox = el.lastBox;
-        }
-        else {
+        } else {
             me.wrapsComponent = true;
             me.framing = target.frameSize || null;
+            me.isComponentChild = target.ownerLayout && target.ownerLayout.isComponentLayout;
 
             lastBox = target.lastBox;
 
             // These items are created top-down, so the ContextItem of our ownerCt should
             // be available (if it is part of this layout run).
             ownerCt = target.ownerCt;
-            if (ownerCt && (ownerCtContext = me.context.items[ownerCt.el.id])) {
+            if (ownerCt && (ownerCtContext = ownerCt.el && me.context.items[ownerCt.el.id])) {
                 me.ownerCtContext = ownerCtContext;
             }
 
@@ -179,7 +179,7 @@ Ext.define('Ext.layout.ContextItem', {
 
             me.widthModel = widthModel = sizeModel.width;
             me.heightModel = heightModel = sizeModel.height;
-            
+
             // The lastBox is populated early but does not get an "invalid" property
             // until layout has occurred. The "false" value is placed in the lastBox
             // by Component.finishedLayout.
@@ -202,7 +202,7 @@ Ext.define('Ext.layout.ContextItem', {
                 }
             }
         }
-        
+
         me.lastBox = lastBox;
     },
 
@@ -229,10 +229,14 @@ Ext.define('Ext.layout.ContextItem', {
             children, i, n, ownerCt, sizeModel, target,
             oldHeightModel = me.heightModel,
             oldWidthModel = me.widthModel,
-            newHeightModel, newWidthModel;
+            newHeightModel, newWidthModel,
+            remainingCount = 0;
 
         me.dirty = me.invalid = false;
         me.props = {};
+
+        // Reset the number of child dimensions since the children will add their part:
+        me.remainingChildDimensions = 0;
 
         if (me.boxChildren) {
             me.boxChildren.length = 0; // keep array (more GC friendly)
@@ -255,7 +259,7 @@ Ext.define('Ext.layout.ContextItem', {
         if (firstTime) {
             // This must occur before we proceed since it can do many things (like add
             // child items perhaps):
-            if (target.beforeLayout) {
+            if (target.beforeLayout && target.beforeLayout !== Ext.emptyFn) {
                 target.beforeLayout();
             }
 
@@ -310,10 +314,10 @@ Ext.define('Ext.layout.ContextItem', {
             me.widthModel = sizeModel.width;
             me.heightModel = sizeModel.height;
 
-            // if we are a container child (not a docked item), and this is a full init,
-            // that means our parent was invalidated, and therefore both our width and our
-            // height are included in remainingChildDimensions
-            if (ownerCtContext && !target.dock) {
+            // if we are a container child (e.g., not a docked item), and this is a full
+            // init, that means our parent was invalidated, and therefore both our width
+            // and our height are included in remainingChildDimensions
+            if (ownerCtContext && !me.isComponentChild) {
                 ownerCtContext.remainingChildDimensions += 2;
             }
         } else if (oldProps) {
@@ -321,22 +325,26 @@ Ext.define('Ext.layout.ContextItem', {
             // this at some point more carefully):
             me.recoverProp('x', oldProps, oldDirty);
             me.recoverProp('y', oldProps, oldDirty);
-
+            
             // if these are calculated by the ownerCt, don't trash them:
             if (me.widthModel.calculated) {
                 me.recoverProp('width', oldProps, oldDirty);
+            } else if ('width' in oldProps) {
+                ++remainingCount;
             }
             if (me.heightModel.calculated) {
                 me.recoverProp('height', oldProps, oldDirty);
+            } else if ('height' in oldProps) {
+                ++remainingCount;
             }
-
-            // if we are a container child (not a docked item) and this is not a full init,
-            // that means our parent was not invalidated, and therefore only the dimensions
-            // that were set last time, and removed from remainingChildDimensions last time,
-            // need to be added back to remainingChildDimensions.
-            if (ownerCtContext && !target.dock) {
-                ownerCtContext.remainingChildDimensions +=
-                    ('width' in oldProps) + ('height' in oldProps);
+            
+            // if we are a container child and this is not a full init, that means our
+            // parent was not invalidated and therefore only the dimensions that were
+            // set last time and removed from remainingChildDimensions last time, need to
+            // be added back to remainingChildDimensions. This only needs to happen for
+            // properties that we don't recover above (model=calculated)
+            if (ownerCtContext && !me.isComponentChild) {
+                ownerCtContext.remainingChildDimensions += remainingCount;
             }
         }
 
@@ -407,7 +415,7 @@ Ext.define('Ext.layout.ContextItem', {
             widthModel = me.widthModel,
             hierarchyState = comp.getHierarchyState(),
             boxParent;
-            
+
         if (widthModel.fixed) { // calculated or configured
             hierarchyState.inShrinkWrapTable = false;
         } else {
@@ -830,7 +838,7 @@ Ext.define('Ext.layout.ContextItem', {
                     me.writeProps(anim.from);
                 }
                 me.el.animate(anim);
-                
+
                 Ext.fx.Manager.getFxQueue(me.el.id)[0].on({
                     afteranimate: function() {
                         if (me.isCollapsingOrExpanding === 1) {
@@ -926,7 +934,7 @@ Ext.define('Ext.layout.ContextItem', {
         if (!info) {
             framing = me.framing;
             border = me.getBorderInfo();
-            
+
             me.frameInfo = info = 
                 framing ? {
                     top   : framing.top    + border.top,
@@ -988,11 +996,11 @@ Ext.define('Ext.layout.ContextItem', {
 
                 if (!info) { // if (no cache)
                     // CSS margins are only checked if there isn't a margin property on the component
-                    info = me.parseMargins(comp.margin) || me.checkCache('marginInfo');
+                    info = me.parseMargins(comp, comp.margin) || me.checkCache('marginInfo');
 
                     // Some layouts also support margins and defaultMargins, e.g. Fit, Border, Box
                     if (manageMargins) {
-                        margins = me.parseMargins(comp.margins, ownerLayout.defaultMargins);
+                        margins = me.parseMargins(comp, comp.margins, ownerLayout.defaultMargins);
 
                         if (margins) { // if (using 'margins' and/or 'defaultMargins')
                             // margin and margins can both be present at the same time and must be combined
@@ -1182,8 +1190,7 @@ Ext.define('Ext.layout.ContextItem', {
      * @return {Boolean}
      */
     hasProp: function (propName) {
-        var value = this.getProp(propName);
-        return typeof value != 'undefined';
+        return this.getProp(propName) != null;
     },
 
     /**
@@ -1195,8 +1202,7 @@ Ext.define('Ext.layout.ContextItem', {
      * @return {Boolean}
      */
     hasDomProp: function (propName) {
-        var value = this.getDomProp(propName);
-        return typeof value != 'undefined';
+        return this.getDomProp(propName) != null;
     },
 
     /**
@@ -1243,7 +1249,7 @@ Ext.define('Ext.layout.ContextItem', {
         }
     },
 
-    parseMargins: function (margins, defaultMargins) {
+    parseMargins: function (comp, margins, defaultMargins) {
         if (margins === true) {
             margins = 5;
         }
@@ -1252,15 +1258,17 @@ Ext.define('Ext.layout.ContextItem', {
             ret;
 
         if (type == 'string' || type == 'number') {
-            ret = Ext.util.Format.parseBox(margins);
+            ret = comp.parseBox(margins);
         } else if (margins || defaultMargins) {
             ret = { top: 0, right: 0, bottom: 0, left: 0 }; // base defaults
 
             if (defaultMargins) {
-                Ext.apply(ret, this.parseMargins(defaultMargins)); // + layout defaults
+                Ext.apply(ret, this.parseMargins(comp, defaultMargins)); // + layout defaults
             }
 
-            Ext.apply(ret, margins); // + config
+            if (margins) {
+                margins = Ext.apply(ret, comp.parseBox(margins)); // + config
+            }
         }
 
         return ret;
@@ -1521,7 +1529,7 @@ Ext.define('Ext.layout.ContextItem', {
         var me = this,
             comp = me.target,
             ownerCtContext = me.ownerCtContext,
-            frameBody, frameInfo, min, oldHeight;
+            frameBody, frameInfo, min, oldHeight, rem;
 
         if (height < 0) {
             height = 0;
@@ -1537,16 +1545,17 @@ Ext.define('Ext.layout.ContextItem', {
             if (!me.setProp('height', height, dirty)) {
                 return NaN;
             }
-        
-            // if we are a container child (not a docked item), since the height is now
-            // known we can decrement the number of remainingChildDimensions that the 
-            // ownerCtContext is waiting on.
-            if (ownerCtContext && !comp.dock && (height !== oldHeight) &&
-                (! --ownerCtContext.remainingChildDimensions)) {
-                // if there are 0 remainingChildDimensions set containerChildrenSizeDone
-                // on the ownerCtContext to indicate that all of its children's dimensions
-                // are known
-                ownerCtContext.setProp('containerChildrenSizeDone', true);
+
+            // if we are a container child, since the height is now known we can decrement
+            // the number of remainingChildDimensions that the ownerCtContext is waiting on.
+            if (ownerCtContext && !me.isComponentChild && isNaN(oldHeight)) {
+                rem = --ownerCtContext.remainingChildDimensions;
+                if (!rem) {
+                    // if there are 0 remainingChildDimensions set containerChildrenSizeDone
+                    // on the ownerCtContext to indicate that all of its children's dimensions
+                    // are known
+                    ownerCtContext.setProp('containerChildrenSizeDone', true);
+                }
             }
 
             frameBody = me.frameBodyContext;
@@ -1571,7 +1580,7 @@ Ext.define('Ext.layout.ContextItem', {
         var me = this,
             comp = me.target,
             ownerCtContext = me.ownerCtContext,
-            frameBody, frameInfo, min, oldWidth;
+            frameBody, frameInfo, min, oldWidth, rem;
 
         if (width < 0) {
             width = 0;
@@ -1588,15 +1597,16 @@ Ext.define('Ext.layout.ContextItem', {
                 return NaN;
             }
 
-            // if we are a container child (not a docked item), since the width is now
-            // known we can decrement the number of remainingChildDimensions that the 
-            // ownerCtContext is waiting on.
-            if (ownerCtContext && !comp.dock && (width !== oldWidth) &&
-                (! --ownerCtContext.remainingChildDimensions)) {
-                // if there are 0 remainingChildDimensions set containerChildrenSizeDone
-                // on the ownerCtContext to indicate that all of its children's dimensions
-                // are known
-                ownerCtContext.setProp('containerChildrenSizeDone', true);
+            // if we are a container child, since the width is now known we can decrement
+            // the number of remainingChildDimensions that the ownerCtContext is waiting on.
+            if (ownerCtContext && !me.isComponentChild && isNaN(oldWidth)) {
+                rem = --ownerCtContext.remainingChildDimensions;
+                if (!rem) {
+                    // if there are 0 remainingChildDimensions set containerChildrenSizeDone
+                    // on the ownerCtContext to indicate that all of its children's dimensions
+                    // are known
+                    ownerCtContext.setProp('containerChildrenSizeDone', true);
+                }
             }
 
             //if ((frameBody = me.target.frameBody) && (frameBody = me.getEl(frameBody))){
@@ -1669,7 +1679,7 @@ Ext.define('Ext.layout.ContextItem', {
             styles = {},
             styleCount = 0, // used as a boolean, the exact count doesn't matter
             styleInfo = me.styleInfo,
-            
+
             info,
             propName,
             numericValue,
@@ -1794,7 +1804,7 @@ Ext.define('Ext.layout.ContextItem', {
         }
     }
 }, function () {
-    
+
     var px =    { dom: true, parseInt: true, suffix: 'px' },
         isDom = { dom: true },
         faux =  { dom: false };

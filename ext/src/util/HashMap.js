@@ -5,19 +5,17 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
- * @class Ext.util.HashMap
- *
  * Represents a collection of a set of key and value pairs. Each key in the HashMap
  * must be unique, the same key cannot exist twice. Access to items is provided via
  * the key only. Sample usage:
@@ -41,6 +39,11 @@ Ext.define('Ext.util.HashMap', {
     },
 
     /**
+     * @private Mutation counter which is incremented upon add and remove.
+     */
+    generation: 0,
+    
+    /**
      * @cfg {Function} keyFn A function that is used to retrieve a default key for a passed object.
      * A default is provided that returns the `id` property on the object. This function is only used
      * if the `add` method is called with a single argument.
@@ -61,7 +64,7 @@ Ext.define('Ext.util.HashMap', {
             /**
              * @event add
              * Fires when a new item is added to the hash.
-             * @param {Ext.util.HashMap} this.
+             * @param {Ext.util.HashMap} this
              * @param {String} key The key of the added item.
              * @param {Object} value The value of the added item.
              */
@@ -69,13 +72,13 @@ Ext.define('Ext.util.HashMap', {
             /**
              * @event clear
              * Fires when the hash is cleared.
-             * @param {Ext.util.HashMap} this.
+             * @param {Ext.util.HashMap} this
              */
             'clear',
             /**
              * @event remove
              * Fires when an item is removed from the hash.
-             * @param {Ext.util.HashMap} this.
+             * @param {Ext.util.HashMap} this
              * @param {String} key The key of the removed item.
              * @param {Object} value The value of the removed item.
              */
@@ -83,7 +86,7 @@ Ext.define('Ext.util.HashMap', {
             /**
              * @event replace
              * Fires when an item is replaced in the hash.
-             * @param {Ext.util.HashMap} this.
+             * @param {Ext.util.HashMap} this
              * @param {String} key The key of the replaced item.
              * @param {Object} value The new value for the item.
              * @param {Object} old The old value for the item.
@@ -164,6 +167,7 @@ Ext.define('Ext.util.HashMap', {
 
         me.map[key] = value;
         ++me.length;
+        me.generation++;
         if (me.hasListeners.add) {
             me.fireEvent('add', me, key, value);
         }
@@ -194,6 +198,7 @@ Ext.define('Ext.util.HashMap', {
         }
         old = map[key];
         map[key] = value;
+        me.generation++;
         if (me.hasListeners.replace) {
             me.fireEvent('replace', me, key, value, old);
         }
@@ -226,6 +231,7 @@ Ext.define('Ext.util.HashMap', {
             value = me.map[key];
             delete me.map[key];
             --me.length;
+            me.generation++;
             if (me.hasListeners.remove) {
                 me.fireEvent('remove', me, key, value);
             }
@@ -237,10 +243,11 @@ Ext.define('Ext.util.HashMap', {
     /**
      * Retrieves an item with a particular key.
      * @param {String} key The key to lookup.
-     * @return {Object} The value at that key. If it doesn't exist, <tt>undefined</tt> is returned.
+     * @return {Object} The value at that key. If it doesn't exist, `undefined` is returned.
      */
     get: function(key) {
-        return this.map[key];
+        var map = this.map;
+        return map.hasOwnProperty(key) ? map[key] : undefined;
     },
 
     /**
@@ -249,8 +256,13 @@ Ext.define('Ext.util.HashMap', {
      */
     clear: function(/* private */ initial) {
         var me = this;
-        me.map = {};
-        me.length = 0;
+
+        // Only clear if it has ever had any content
+        if (initial || me.generation) {
+            me.map = {};
+            me.length = 0;
+            me.generation = initial ? 0 : me.generation + 1;
+        }
         if (initial !== true && me.hasListeners.clear) {
             me.fireEvent('clear', me);
         }
@@ -263,7 +275,8 @@ Ext.define('Ext.util.HashMap', {
      * @return {Boolean} True if they key exists in the hash.
      */
     containsKey: function(key) {
-        return this.map[key] !== undefined;
+        var map = this.map;
+        return map.hasOwnProperty(key) && map[key] !== undefined;
     },
 
     /**
@@ -313,14 +326,11 @@ Ext.define('Ext.util.HashMap', {
      * Executes the specified function once for each item in the hash.
      * Returning false from the function will cease iteration.
      *
-     * The paramaters passed to the function are:
-     * <div class="mdetail-params"><ul>
-     * <li><b>key</b> : String<p class="sub-desc">The key of the item</p></li>
-     * <li><b>value</b> : Number<p class="sub-desc">The value of the item</p></li>
-     * <li><b>length</b> : Number<p class="sub-desc">The total number of items in the hash</p></li>
-     * </ul></div>
      * @param {Function} fn The function to execute.
-     * @param {Object} scope The scope to execute in. Defaults to <tt>this</tt>.
+     * @param {String} fn.key The key of the item.
+     * @param {Number} fn.value The value of the item.
+     * @param {Number} fn.length The total number of items in the hash.
+     * @param {Object} [scope] The scope to execute in. Defaults to <tt>this</tt>.
      * @return {Ext.util.HashMap} this
      */
     each: function(fn, scope) {

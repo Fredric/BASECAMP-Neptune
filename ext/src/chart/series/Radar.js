@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * @class Ext.chart.series.Radar
@@ -159,7 +159,7 @@ Ext.define('Ext.chart.series.Radar', {
     constructor: function(config) {
         this.callParent(arguments);
         var me = this,
-            surface = me.chart.surface, i, l;
+            surface = me.chart.surface;
         me.group = surface.getGroup(me.seriesId);
         if (me.showMarkers) {
             me.markerGroup = surface.getGroup(me.seriesId + '-markers');
@@ -175,15 +175,12 @@ Ext.define('Ext.chart.series.Radar', {
             data = store.data.items,
             d, record,
             group = me.group,
-            sprite,
             chart = me.chart,
             seriesItems = chart.series.items,
             s, sLen, series,
-            animate = chart.animate,
             field = me.field || me.yField,
             surface = chart.surface,
             chartBBox = chart.chartBBox,
-            seriesIdx = me.seriesIdx,
             colorArrayStyle = me.colorArrayStyle,
             centerX, centerY,
             items,
@@ -198,8 +195,6 @@ Ext.define('Ext.chart.series.Radar', {
             startPath, path, x, y, rho,
             i, nfields,
             seriesStyle = me.seriesStyle,
-            seriesLabelStyle = me.seriesLabelStyle,
-            first = chart.resizing || !me.radar,
             axis = chart.axes && chart.axes.get(0),
             aggregate = !(axis && axis.maximum);
 
@@ -389,8 +384,7 @@ Ext.define('Ext.chart.series.Radar', {
             config = me.label,
             centerX = me.centerX,
             centerY = me.centerY,
-            point = item.point,
-            endLabelStyle = Ext.apply(me.seriesLabelStyle || {}, config);
+            endLabelStyle = Ext.apply({}, config, me.seriesLabelStyle || {});
 
         return me.chart.surface.add(Ext.apply({
             'type': 'text',
@@ -398,11 +392,11 @@ Ext.define('Ext.chart.series.Radar', {
             'group': group,
             'x': centerX,
             'y': centerY
-        }, config || {}));
+        }, endLabelStyle || {}));
     },
 
     // @private callback for when placing a label sprite.
-    onPlaceLabel: function(label, storeItem, item, i, display, animate) {
+    onPlaceLabel: function(label, storeItem, item, i, display, animate, index) {
         var me = this,
             chart = me.chart,
             resizing = chart.resizing,
@@ -412,17 +406,39 @@ Ext.define('Ext.chart.series.Radar', {
             centerX = me.centerX,
             centerY = me.centerY,
             opt = {
-                x: item.point[0],
-                y: item.point[1]
+                x: Number(item.point[0]),
+                y: Number(item.point[1])
             },
             x = opt.x - centerX,
-            y = opt.y - centerY;
+            y = opt.y - centerY,
+            theta = Math.atan2(y, x || 1),
+            deg = theta * 180 / Math.PI,
+            labelBox, direction;
+
+            function fixAngle(a) {
+                if (a < 0) {
+                    a += 360;
+                }
+                return a % 360;
+            }
 
         label.setAttributes({
-            text: format(storeItem.get(field)),
+            text: format(storeItem.get(field), label, storeItem, item, i, display, animate, index),
             hidden: true
         },
         true);
+
+        // Move the label by half its height or width depending on 
+        // the angle so the label doesn't overlap the graph.
+        labelBox = label.getBBox();
+        deg = fixAngle(deg);
+        if ((deg > 45 && deg < 135) || (deg > 225 && deg < 315)) {
+            direction = (deg > 45 && deg < 135 ? 1 : -1);
+            opt.y += direction * labelBox.height/2;
+        } else {
+            direction = (deg >= 135 && deg <= 225 ? -1 : 1);
+            opt.x += direction * labelBox.width/2;
+        }
 
         if (resizing) {
             label.setAttributes({

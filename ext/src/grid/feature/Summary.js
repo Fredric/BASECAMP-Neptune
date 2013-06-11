@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * This feature is used to place a summary row at the bottom of the grid. If using a grouping, 
@@ -115,8 +115,7 @@ Ext.define('Ext.grid.feature.Summary', {
 
     init: function(grid) {
         var me = this,
-            view = me.view,
-            tableTpl = view.tableTpl;
+            view = me.view;
 
         me.callParent(arguments);
 
@@ -127,11 +126,15 @@ Ext.define('Ext.grid.feature.Summary', {
             });
             grid.on({
                 beforerender: function() {
+                    var tableCls = [me.summaryTableCls];
+                    if (view.columnLines) {
+                        tableCls[tableCls.length] = view.ownerCt.colLinesCls;
+                    }
                     me.summaryBar = grid.addDocked({
                         childEls: ['innerCt'],
                         renderTpl: [
                             '<div id="{id}-innerCt">',
-                                '<table cellpadding="0" class="' + me.summaryTableCls + '">',
+                                '<table cellPadding="0" cellSpacing="0" class="' + tableCls.join(' ') + '">',
                                     '<tr class="' + me.summaryRowCls + '"></tr>',
                                 '</table>',
                             '</div>'
@@ -269,7 +272,7 @@ Ext.define('Ext.grid.feature.Summary', {
     // Synchronize column widths in the docked summary Component
     onColumnHeaderLayout: function() {
         var view = this.view,
-            columns = view.headerCt.getGridColumns(),
+            columns = view.headerCt.getVisibleGridColumns(),
             column,
             len = columns.length, i,
             summaryEl = this.summaryBar.el,

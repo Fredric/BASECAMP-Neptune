@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * A base class for all menu items that require menu-related functionality such as click handling,
@@ -40,6 +40,10 @@ Ext.define('Ext.menu.Item', {
     extend: 'Ext.Component',
     alias: 'widget.menuitem',
     alternateClassName: 'Ext.menu.TextItem',
+    
+    mixins: {
+        queryable: 'Ext.Queryable'
+    },
 
     /**
      * @property {Boolean} activated
@@ -74,7 +78,7 @@ Ext.define('Ext.menu.Item', {
      * The delay in milliseconds to wait before hiding the menu after clicking the menu item.
      * This only has an effect when `hideOnClick: true`.
      */
-    clickHideDelay: 1,
+    clickHideDelay: 0,
 
     /**
      * @cfg {Boolean} destroyMenu
@@ -114,6 +118,15 @@ Ext.define('Ext.menu.Item', {
     /**
      * @cfg {String} iconCls
      * A CSS class that specifies a `background-image` to use as the icon for this item.
+     */
+
+    /**
+     * @cfg {Number/String} glyph
+     * A numeric unicode character code to use as the icon for this item. The default
+     * font-family for glyphs can be set globally using
+     * {@link Ext#setGlyphFontFamily Ext.setGlyphFontFamily()}. Alternatively, this
+     * config option accepts a string with the charCode and font-family separated by the
+     * `@` symbol. For example '65@My Font Family'.
      */
 
     isMenuItem: true,
@@ -181,9 +194,15 @@ Ext.define('Ext.menu.Item', {
                 ' hidefocus="true"',
                 // For most browsers the text is already unselectable but Opera needs an explicit unselectable="on".
                 ' unselectable="on"',
+                '<tpl if="tabIndex">',
+                    ' tabIndex="{tabIndex}"',
+                '</tpl>',
             '>',
-                '<img id="{id}-iconEl" src="{icon}" class="' + Ext.baseCSSPrefix + 'menu-item-icon {iconCls}',
-                    '{childElCls}"/>',
+                '<div role="img" id="{id}-iconEl" class="' + Ext.baseCSSPrefix + 'menu-item-icon {iconCls}',
+                    '{childElCls} {glyphCls}" style="<tpl if="icon">background-image:url({icon});</tpl>',
+                    '<tpl if="glyph && glyphFontFamily">font-family:{glyphFontFamily};</tpl>">',
+                    '<tpl if="glyph">&#{glyph};</tpl>',
+                '</div>',
                 '<span id="{id}-textEl" class="' + Ext.baseCSSPrefix + 'menu-item-text" unselectable="on">{text}</span>',
                 '<img id="{id}-arrowEl" src="{blank}" class="{arrowCls}',
                     '{childElCls}"/>',
@@ -369,7 +388,8 @@ Ext.define('Ext.menu.Item', {
     },
 
     onClick: function(e) {
-        var me = this;
+        var me = this,
+            clickHideDelay = me.clickHideDelay;
 
         if (!me.href) {
             e.stopEvent();
@@ -380,7 +400,11 @@ Ext.define('Ext.menu.Item', {
         }
 
         if (me.hideOnClick) {
-            me.deferHideParentMenusTimer = Ext.defer(me.deferHideParentMenus, me.clickHideDelay, me);
+            if (!clickHideDelay) {
+                me.deferHideParentMenus();
+            } else {
+                me.deferHideParentMenusTimer = Ext.defer(me.deferHideParentMenus, clickHideDelay, me);
+            }
         }
 
         Ext.callback(me.handler, me.scope || me, [me, e]);
@@ -425,8 +449,9 @@ Ext.define('Ext.menu.Item', {
     beforeRender: function() {
         var me = this,
             blank = Ext.BLANK_IMAGE_URL,
-            iconCls,
-            arrowCls;
+            glyph = me.glyph,
+            glyphFontFamily = Ext._glyphFontFamily,
+            glyphParts, iconCls, arrowCls;
 
         me.callParent();
 
@@ -437,18 +462,28 @@ Ext.define('Ext.menu.Item', {
             iconCls = (me.iconCls || '') + (me.checkChangeDisabled ? ' ' + me.disabledCls : '');
             arrowCls = me.menu ? me.arrowCls : '';
         }
-        
+
+        if (typeof glyph === 'string') {
+            glyphParts = glyph.split('@');
+            glyph = glyphParts[0];
+            glyphFontFamily = glyphParts[1];
+        }
+
         Ext.applyIf(me.renderData, {
             href: me.href || '#',
             hrefTarget: me.hrefTarget,
-            icon: me.icon || blank,
+            icon: me.icon,
             iconCls: iconCls,
-            hasIcon: !!(me.icon || me.iconCls),
+            glyph: glyph,
+            glyphCls: glyph ? Ext.baseCSSPrefix + 'menu-item-glyph' : undefined,
+            glyphFontFamily: glyphFontFamily,
+            hasIcon: !!(me.icon || me.iconCls || glyph),
             iconAlign: me.iconAlign,
             plain: me.plain,
             text: me.text,
             arrowCls: arrowCls,
-            blank: blank
+            blank: blank,
+            tabIndex: me.tabIndex
         });
     },
 

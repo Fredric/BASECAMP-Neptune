@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * The Ext.grid.plugin.RowEditing plugin injects editing at a row level for a Grid. When editing begins,
@@ -131,15 +131,18 @@ Ext.define('Ext.grid.plugin.RowEditing', {
             editor = me.getEditor(),
             context;
 
-        if ((editor.beforeEdit() !== false) && (me.callParent(arguments) !== false)) {
+        if (editor.beforeEdit() !== false) {
+            context = me.callParent(arguments);
+            if (context) {
+                me.context = context;
 
-            // If editing one side of a lockable grid, cancel any edit on the other side.
-            if (me.lockingPartner) {
-                me.lockingPartner.cancelEdit();
+                // If editing one side of a lockable grid, cancel any edit on the other side.
+                if (me.lockingPartner) {
+                    me.lockingPartner.cancelEdit();
+                }
+                editor.startEdit(context.record, context.column, context);
+                return true;
             }
-            context = me.context;
-            editor.startEdit(context.record, context.column, context);
-            return true;
         }
         return false;
     },
@@ -175,7 +178,7 @@ Ext.define('Ext.grid.plugin.RowEditing', {
             record         = context.record,
             newValues      = {},
             originalValues = {},
-            editors        = editor.items.items,
+            editors        = editor.query('>[isFormField]'),
             e,
             eLen           = editors.length,
             name, item;
@@ -226,8 +229,7 @@ Ext.define('Ext.grid.plugin.RowEditing', {
                 hidden: true,
                 view: view,
                 // keep a reference..
-                editingPlugin: me,
-                renderTo: view.el
+                editingPlugin: me
             },
             item;
 
@@ -259,8 +261,7 @@ Ext.define('Ext.grid.plugin.RowEditing', {
                     scope: me,
                     columnresize: me.onColumnResize,
                     columnhide: me.onColumnHide,
-                    columnshow: me.onColumnShow,
-                    columnmove: me.onColumnMove
+                    columnshow: me.onColumnShow
                 });
             },
             single: true
@@ -305,7 +306,7 @@ Ext.define('Ext.grid.plugin.RowEditing', {
                 editor = me.getEditor();
 
             if (editor && editor.onColumnRemove) {
-                editor.onColumnRemove(column);
+                editor.onColumnRemove(ct, column);
             }
             me.removeFieldAccessors(column);
         }
@@ -351,10 +352,14 @@ Ext.define('Ext.grid.plugin.RowEditing', {
         var me = this,
             editor = me.getEditor();
 
+        // Inject field accessors on move because if the move FROM the main headerCt and INTO a grouped header,
+        // the accessors will have been deleted but not added. They are added conditionally.
+        me.initFieldAccessors(column);
+
         if (editor && editor.onColumnMove) {
             // Must adjust the toIdx to account for removal if moving rightwards
             // because RowEditor.onColumnMove just calls Container.move which does not do this.
-            editor.onColumnMove(column, fromIdx, toIdx - (toIdx > fromIdx ? 1 : 0));
+            editor.onColumnMove(column, fromIdx, toIdx);
         }
     },
 

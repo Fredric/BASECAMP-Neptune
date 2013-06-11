@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * Controllers are the glue that binds an application together. All they really do is listen for events (usually from
@@ -252,6 +252,10 @@ Ext.define('Ext.app.Controller', {
             var me = this,
                 strings = me.strings[kind],
                 o, absoluteName, shortName, name, j, subLn, getterName, getter;
+                
+             if (!Ext.isArray(names)) {
+                 names = [names];
+             }
 
             for (j = 0, subLn = names.length; j < subLn; j++) {
                 name = names[j];
@@ -338,7 +342,7 @@ Ext.define('Ext.app.Controller', {
     application: null,
 
     /**
-     * @cfg {String[]} models
+     * @cfg {String/String[]} models
      * Array of models to require from AppName.model namespace. For example:
      *
      *      Ext.define("MyApp.controller.Foo", {
@@ -364,7 +368,7 @@ Ext.define('Ext.app.Controller', {
      */
 
     /**
-     * @cfg {String[]} views
+     * @cfg {String/String[]} views
      * Array of views to require from AppName.view namespace and to generate getter methods for.
      * For example:
      *
@@ -390,7 +394,7 @@ Ext.define('Ext.app.Controller', {
      */
 
     /**
-     * @cfg {String[]} stores
+     * @cfg {String/String[]} stores
      * Array of stores to require from AppName.store namespace and to generate getter methods for.
      * For example:
      *
@@ -535,6 +539,19 @@ Ext.define('Ext.app.Controller', {
             me._initialized = true;
         }
     },
+    
+    finishInit: function(app) {
+        var me = this,
+            controllers = me.controllers,
+            controller, i, l;
+        
+        if (me._initialized && controllers && controllers.length) {
+            for (i = 0, l = controllers.length; i < l; i++) {
+                controller = me.getController(controllers[i]);
+                controller.finishInit(app);
+            }
+        }
+    },
 
     /**
      * A template method that is called when your application boots. It is called before the
@@ -583,7 +600,7 @@ Ext.define('Ext.app.Controller', {
     /**
      * Registers one or more {@link #refs references}.
      *
-     * @param {Object/Object[]} ref(s)
+     * @param {Object/Object[]} refs
      */
     addRef: function(refs) {
         this.ref(refs);

@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * A selection model that renders a column of checkboxes that can be toggled to
@@ -49,6 +49,8 @@ Ext.define('Ext.selection.CheckboxModel', {
     /**
      * @cfg {Boolean} showHeaderCheckbox
      * Configure as `false` to not display the header checkbox at the top of the column.
+     * When {@link Ext.data.Store#buffered} is set to `true`, this configuration will
+     * not be available because the buffered data set does not always contain all data. 
      */
     showHeaderCheckbox: undefined,
     
@@ -77,14 +79,9 @@ Ext.define('Ext.selection.CheckboxModel', {
 
     beforeViewRender: function(view) {
         var me = this,
-            views = me.views,
             owner;
             
         me.callParent(arguments);
-        
-        if (Ext.Array.indexOf(views, view) === -1) {
-            views.push(view);
-        }
 
         // if we have a locked header, only hook up to the first
         if (!me.hasLockedHeader() || view.headerCt.lockedCt) {
@@ -138,6 +135,9 @@ Ext.define('Ext.selection.CheckboxModel', {
                 checkbox = headerCt.getColumnCount();
             }
             Ext.suspendLayouts();
+            if (view.getStore().buffered) {
+                me.showHeaderCheckbox = false;
+            }
             headerCt.add(checkbox,  me.getHeaderConfig());
             Ext.resumeLayouts();
         }
@@ -207,11 +207,12 @@ Ext.define('Ext.selection.CheckboxModel', {
      */
     getHeaderConfig: function() {
         var me = this,
-            showCheck = me.showHeaderCheckbox !== false;
+            showCheck = me.showHeaderCheckbox !== false;     
 
         return {
             isCheckerHd: showCheck,
             text : '&#160;',
+            clickTargetName: 'el',
             width: me.headerWidth,
             sortable: false,
             draggable: false,
@@ -277,7 +278,7 @@ Ext.define('Ext.selection.CheckboxModel', {
      */
     onSelectChange: function() {
         this.callParent(arguments);
-        if (!this.bulkChange) {
+        if (!this.suspendChange) {
             this.updateHeaderState();
         }
     },
@@ -306,10 +307,17 @@ Ext.define('Ext.selection.CheckboxModel', {
     },
     
     maybeFireSelectionChange: function(fireEvent) {
-        if (fireEvent && !this.bulkChange) {
+        if (fireEvent && !this.suspendChange) {
             this.updateHeaderState();
         }
         this.callParent(arguments);
+    },
+    
+    resumeChanges: function(){
+        this.callParent();
+        if (!this.suspendChange) {
+            this.updateHeaderState();
+        }
     },
 
     /**
@@ -325,7 +333,7 @@ Ext.define('Ext.selection.CheckboxModel', {
             selectedCount = 0,
             selected, len, i;
             
-        if (storeCount > 0) {
+        if (!store.buffered && storeCount > 0) {
             selected = me.selected;
             hdSelectStatus = true;
             for (i = 0, len = selected.getCount(); i < len; ++i) {

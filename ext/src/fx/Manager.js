@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * @class Ext.fx.Manager
@@ -47,9 +47,10 @@ Ext.define('Ext.fx.Manager', {
         var me = this;
         me.items = new Ext.util.MixedCollection();
         me.mixins.queue.constructor.call(me);
-        me.taskRunner = new Ext.util.TaskRunner({
-            fireIdleEvent: false
-        });
+        
+        // Do not use fireIdleEvent: false. Each tick of the TaskRunner needs to fire the idleEvent
+        // in case an animation callback/listener adds a listener.
+        me.taskRunner = new Ext.util.TaskRunner();
 
         // this.requestAnimFrame = (function() {
         //     var raf = window.requestAnimationFrame ||
@@ -252,7 +253,6 @@ Ext.define('Ext.fx.Manager', {
             return;
         }
         var me = this,
-            targetId = anim.target.getId(),
             useCSS3 = me.useCSS3 && anim.target.type == 'element',
             elapsedTime = me.timestamp - anim.startTime,
             lastFrame = (elapsedTime >= anim.duration),

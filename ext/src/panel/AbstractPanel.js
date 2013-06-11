@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  * @class Ext.panel.AbstractPanel
@@ -40,7 +40,7 @@ Ext.define('Ext.panel.AbstractPanel', {
     /**
      * @cfg {String} [baseCls=x-panel]
      * The base CSS class to apply to this panel's element.
-     * @since Ext 2
+     * @since 2.3.0
      */
     baseCls : Ext.baseCSSPrefix + 'panel',
 
@@ -53,9 +53,9 @@ Ext.define('Ext.panel.AbstractPanel', {
 
     /**
      * @cfg {Boolean} bodyBorder
-     * A shortcut to add or remove the border on the body of a panel. This only applies to a panel which has the {@link #frame} configuration set to `true`.
-     * Defaults to <code>undefined</code>.
-     * @since Ext 2
+     * A shortcut to add or remove the border on the body of a panel. In the classic theme
+     * this only applies to a panel which has the {@link #frame} configuration set to `true`.
+     * @since 2.3.0
      */
 
     /**
@@ -71,7 +71,7 @@ bodyStyle: {
 }
      * </code></pre>
      *
-     * @since Ext 2
+     * @since 2.3.0
      */
 
     /**
@@ -136,7 +136,9 @@ bodyCls: ['foo', 'bar']
         // panel and the body. This in turn allows CSS height to expand or contract the
         // panel during things like portlet dragging where we want to avoid running a ton
         // of layouts during the drag operation.
-        (Ext.isIE7m || Ext.isIEQuirks) ? '<div></div>' : '',
+        // This empty div also has to be relatively positioned, otherwise it crashes IE6-9 Quirks
+        // when panel is rendered in a table-based layout.
+        (Ext.isIE7m || Ext.isIEQuirks) ? '<div style="position:relative"></div>' : '',
         '<div id="{id}-body" class="{baseCls}-body<tpl if="bodyCls"> {bodyCls}</tpl>',
             ' {baseCls}-body-{ui}<tpl if="uiCls">',
                 '<tpl for="uiCls"> {parent.baseCls}-body-{parent.ui}-{.}</tpl>',
@@ -171,7 +173,7 @@ var panel = new Ext.panel.Panel({
 });</code></pre>
      */
 
-    // @since Ext 2
+    // @since 2.3.0
     border: true,
 
     /**
@@ -180,10 +182,12 @@ var panel = new Ext.panel.Panel({
     emptyArray: [],
 
     initComponent : function() {
-        var me = this;
+        this.initBorderProps();
+        this.callParent();
+    },
 
-        //!frame
-        //!border
+    initBorderProps: function() {
+        var me = this;
 
         if (me.frame && me.border && me.bodyBorder === undefined) {
             me.bodyBorder = false;
@@ -191,8 +195,6 @@ var panel = new Ext.panel.Panel({
         if (me.frame && me.border && (me.bodyBorder === false || me.bodyBorder === 0)) {
             me.manageBodyBorders = true;
         }
-
-        me.callParent();
     },
 
     beforeDestroy: function(){
@@ -228,7 +230,7 @@ var panel = new Ext.panel.Panel({
      * items will only be matched by component id or itemId -- if you pass a numeric index only non-docked child components will be searched.
      * @param {String/Number} comp The component id, itemId or position to find
      * @return {Ext.Component} The component (if found)
-     * @since Ext 2
+     * @since 2.3.0
      */
     getComponent: function(comp) {
         var component = this.callParent(arguments);
@@ -264,8 +266,7 @@ var panel = new Ext.panel.Panel({
      */
     initBodyStyles: function() {
         var me = this,
-            body = me.getProtoBody(),
-            Element = Ext.Element;
+            body = me.getProtoBody();
 
         if (me.bodyPadding !== undefined) {
             if (me.layout.managePadding) {
@@ -276,14 +277,20 @@ var panel = new Ext.panel.Panel({
                 // therefore necessary to set the body element's padding to "0".
                 body.setStyle('padding', 0);
             } else {
-                body.setStyle('padding', Element.unitizeBox((me.bodyPadding === true) ? 5 : me.bodyPadding));
+                body.setStyle('padding', this.unitizeBox((me.bodyPadding === true) ? 5 : me.bodyPadding));
             }
         }
+        me.initBodyBorder();
+    },
+
+    initBodyBorder: function() {
+        var me = this;
+
         if (me.frame && me.bodyBorder) {
             if (!Ext.isNumber(me.bodyBorder)) {
                 me.bodyBorder = 1;
             }
-            body.setStyle('border-width', Element.unitizeBox(me.bodyBorder));
+            me.getProtoBody().setStyle('border-width', this.unitizeBox(me.bodyBorder));
         }
     },
 

@@ -5,15 +5,15 @@ Copyright (c) 2011-2013 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Pre-release code in the Ext repository is intended for development purposes only and will
-not always be stable. 
+Commercial Usage
+Licensees holding valid commercial licenses may use this file in accordance with the Commercial
+Software License Agreement provided with the Software or, alternatively, in accordance with the
+terms contained in a written agreement between you and Sencha.
 
-Use of pre-release code is permitted with your application at your own risk under standard
-Ext license terms. Public redistribution is prohibited.
+If you are unsure which license is appropriate for your use, please contact the sales department
+at http://www.sencha.com/contact.
 
-For early licensing, please contact us at licensing@sencha.com
-
-Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
+Build date: 2013-05-16 14:36:50 (f9be68accb407158ba2b1be2c226a6ce1f649314)
 */
 /**
  *
@@ -21,7 +21,18 @@ Build date: 2013-02-13 19:36:35 (686c47f8f04c589246d9f000f87d2d6392c82af5)
 Ext.define('Ext.selection.CellModel', {
     extend: 'Ext.selection.Model',
     alias: 'selection.cellmodel',
-    requires: ['Ext.util.KeyNav'],
+    requires: [
+        'Ext.grid.CellContext',
+        'Ext.util.KeyNav'
+    ],
+
+    /**
+     * @cfg {"SINGLE"} mode
+     * Mode of selection.  Valid values are:
+     *
+     * - **"SINGLE"** - Only allows selecting one item at a time. This is the default.
+     */
+
 
     isCellModel: true,
 
@@ -124,19 +135,19 @@ Ext.define('Ext.selection.CellModel', {
         return view.headerCt;
     },
 
-    onKeyUp: function(e, t) {
+    onKeyUp: function(e) {
         this.doMove('up', e);
     },
 
-    onKeyDown: function(e, t) {
+    onKeyDown: function(e) {
         this.doMove('down', e);
     },
 
-    onKeyLeft: function(e, t) {
+    onKeyLeft: function(e) {
         this.doMove('left', e);
     },
 
-    onKeyRight: function(e, t) {
+    onKeyRight: function(e) {
         this.doMove('right', e);
     },
     
@@ -144,6 +155,44 @@ Ext.define('Ext.selection.CellModel', {
         this.keyNavigation = true;
         this.move(direction, e);
         this.keyNavigation = false;
+    },
+    
+    onVetoUIEvent: Ext.emptyFn,
+    
+    select: function(pos, keepExisting, suppressEvent) {
+        var me = this,
+            row,
+            oldPos = me.getCurrentPosition(),
+            store = me.view.store;
+        
+        if (pos || pos === 0) {
+            if (pos.isModel) {
+                row = store.indexOf(pos);
+                if (row !== -1) {
+                    pos = {
+                        row: row,
+                        column: oldPos ? oldPos.column : 0
+                    };
+                } else {
+                    pos = null;
+                } 
+            } else if (typeof pos === 'number') {
+                pos = {
+                    row: pos,
+                    column: 0
+                }
+            }
+        } 
+        
+        if (pos) {
+            me.selectByPosition(pos, suppressEvent);   
+        } else {
+            me.deselect();
+        }
+    },
+    
+    deselect: function(record, suppressEvent){
+        this.selectByPosition(null, suppressEvent);    
     },
 
     move: function(dir, e) {
@@ -178,8 +227,9 @@ Ext.define('Ext.selection.CellModel', {
     /**
      * Sets the current position
      * @param {Object} position The position to set.
+     * @param {Boolean} suppressEvent True to suppress selection events
      */
-    setCurrentPosition: function(pos) {
+    setCurrentPosition: function(pos, suppressEvent) {
         var me = this,
             last = me.selection;
 
@@ -187,20 +237,19 @@ Ext.define('Ext.selection.CellModel', {
         me.lastSelection = last;
         if (last) {
             // If the position is the same, jump out & don't fire the event
-            if (pos && (pos.row === last.row && pos.column === last.column && pos.view === last.view)) {
+            if (pos && (pos.record === last.record && pos.columnHeader === last.columnHeader && pos.view === last.view)) {
                 pos = null;
             } else {
-                me.onCellDeselect(me.selection);
+                me.onCellDeselect(me.selection, suppressEvent);
             }
         }
 
         if (pos) {
-            me.nextSelection = new me.Selection(me);
-            me.nextSelection.setPosition(pos);
+            me.nextSelection = new Ext.grid.CellContext(me.primaryView).setPosition(pos);
             // set this flag here so we know to use nextSelection
             // if the node is updated during a select
             me.selecting = true;
-            me.onCellSelect(me.nextSelection);
+            me.onCellSelect(me.nextSelection, suppressEvent);
             me.selecting = false;
             // Deselect triggered by new selection will kill the selection property, so restore it here.
             return (me.selection = me.nextSelection);
@@ -217,9 +266,7 @@ Ext.define('Ext.selection.CellModel', {
             pos = me.getCurrentPosition();
 
         if (pos && pos.view === view) {
-            testPos = new this.Selection(me);
-            testPos.setPosition({
-                view: view,
+            testPos = new Ext.grid.CellContext(view).setPosition({
                 row: row,
                 column: column
             });
@@ -316,8 +363,8 @@ Ext.define('Ext.selection.CellModel', {
                 commitFn() !== false) {
 
             if (isSelected) {
+                view.focusRow(record, true);
                 view.onCellSelect(pos);
-                view.onCellFocus(pos);
             } else {
                 view.onCellDeselect(pos);
                 delete me.selection;
@@ -354,16 +401,13 @@ Ext.define('Ext.selection.CellModel', {
         // Navigation had somewhere to go.... not hit the buffers.
         if (position) {
             // If we were able to begin editing clear the wasEditing flag. It gets set during navigation off an active edit.
-            if (editingPlugin.startEdit(position.row, position.column)) {
+            if (editingPlugin.startEdit(position.record, position.columnHeader)) {
                 me.wasEditing = false;
             }
             // If we could not continue editing...
             // Set a flag that we should go back into editing mode upon next onKeyTab call
             else {
                 me.wasEditing = true;
-                if (!position.columnHeader.dataIndex) {
-                    me.onEditorTab(editingPlugin, e);
-                }
             }
         }
     },
@@ -440,72 +484,7 @@ Ext.define('Ext.selection.CellModel', {
         }
     },
 
-    selectByPosition: function(position) {
-        this.setCurrentPosition(position);
+    selectByPosition: function(position, suppressEvent) {
+        this.setCurrentPosition(position, suppressEvent);
     }
-}, function() {
-    
-    // Encapsulate a single selection position.
-    // Maintains { row: n, column: n, record: r, columnHeader: c}
-    var Selection = this.prototype.Selection = function(model) {
-        this.model = model;
-        this.view = model.primaryView;
-    };
-    // Selection row/record & column/columnHeader
-    Selection.prototype.setPosition = function(row, col) {
-        var me = this;
-
-        // We were passed {row: 1, column: 2, view: myView}
-        if (arguments.length === 1) {
-            
-            // SelectionModel is shared between both sides of a locking grid.
-            // It can be positioned on either view.
-            if (row.view) {
-                me.view = row.view;
-            }
-            col = row.column;
-            row = row.row;
-        }
-
-        me.setRow(row);
-        me.setColumn(col);
-        return me;
-    };
-
-    Selection.prototype.setRow = function(row) {
-        var me = this;
-        if (row !== undefined) {
-            // Row index passed
-            if (typeof row === 'number') {
-                me.row = Math.max(Math.min(row, me.view.store.getCount() - 1), 0);
-                me.record = me.view.store.getAt(row);
-            }
-            // row is a Record
-            else if (row.isModel) {
-                me.record = row;
-                me.row = me.view.indexOf(row);
-            }
-            // row is a grid row
-            else if (row.tagName) {
-                me.record = me.view.getRecord(row);
-                me.row = me.view.indexOf(me.record);
-            }
-        }
-    };
-
-    Selection.prototype.setColumn = function(col) {
-        var me = this;
-        if (col !== undefined) {
-            // column index passed
-            if (typeof col === 'number') {
-                me.column = col;
-                me.columnHeader = me.view.getHeaderAtIndex(col);
-            }
-            // column Header passed
-            else if (col.isHeader) {
-                me.columnHeader = col;
-                me.column = col.getIndex();
-            }
-        }
-    };
 });
