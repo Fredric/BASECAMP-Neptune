@@ -7,16 +7,15 @@
 // DO NOT DELETE - this directive is required for Sencha Cmd packages to work.
 //@require @packageOverrides
 
-Ext.require('Ext.util.History');
-//Ext.require('Ext.data.*.Json');
-Ext.require('Ext.layout.container.Border');
+//Ext.require('Ext.util.History');
+//Ext.require('Ext.layout.container.Border');
+//
+////Ext overrides
+//Ext.Loader.setPath('Overrides', 'lib/overrides');
+//Ext.require('Overrides.data.reader.Reader');
+//Ext.require('Ext.grid.plugin.BufferedRendererTreeView');
 
-//Ext overrides
-Ext.Loader.setPath('Overrides', 'lib/overrides');
-Ext.require('Overrides.data.reader.Reader');
-Ext.require('Ext.grid.plugin.BufferedRendererTreeView');
-
-Ext.Loader.setPath('Abstract', 'lib/abstract');
+//Ext.Loader.setPath('Abstract', 'lib/abstract');
 
 Ext.application({
     name: 'BASECAMP',

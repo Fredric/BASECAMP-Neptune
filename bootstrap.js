@@ -11,8 +11,8 @@ Ext.Loader.addClassPathMappings({
   "BASECAMP": "app",
   "Ext.rtl.EventObjectImpl": "ext/src/rtl/EventObject.js",
   "BASECAMP.Application": "app/application.js",
-  "Overrides": "lib/overrides",
-  "Abstract": "lib/abstract"
+  "Overrides": "lib/Overrides",
+  "Abstract": "lib/Abstract"
 });
 Ext.ClassManager.addNameAlternateMappings({
   "ExtThemeNeptune.container.ButtonGroup": [],
