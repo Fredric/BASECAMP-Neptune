@@ -57,6 +57,7 @@ this file in most cases.
         need to execute the command with curdir set properly for Cmd to pick up that we
         are running for an application.
         -->
+        <echo>##teamcity[testMessage 'textMessageValue']</echo>
         <exec executable="sencha" dir="${basedir}">
             <arg value="which"/><arg value="-o=$cmddir$"/>
         </exec>
