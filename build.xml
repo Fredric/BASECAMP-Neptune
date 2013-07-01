@@ -8,12 +8,19 @@
     <import file="${basedir}/.sencha/app/build-impl.xml"/>
 
     <target name="-before-page">
-        <echo>##teamcity[progressMessage 'Creating all-classes.js']</echo>
+        <echo>##teamcity[progressStart 'Creating all-classes.js']</echo>
+    </target>
+    <target name="-after-page">
+        <echo>##teamcity[progressFinish 'Done Creating all-classes.js']</echo>
     </target>
 
-    <target name="-before-build">
-           <echo>##teamcity[progressMessage 'Building..']</echo>
-     </target>
+    <target name="-before-sass">
+        <echo>##teamcity[progressStart 'Creating CSS using Sass']</echo>
+    </target>
+    <target name="-after-sass">
+        <echo>##teamcity[progressFinish 'Done Creating CSS']</echo>
+    </target>
+
 
     <!--
     The following targets can be provided to inject logic before and/or after key steps
