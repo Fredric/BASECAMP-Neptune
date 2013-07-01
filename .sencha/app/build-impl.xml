@@ -79,7 +79,7 @@ this file in most cases.
                  classpath="${cmd.dir}/sencha.jar"
                  loaderref="senchaloader"/>
         <x-sencha-init prefix=""/>
-        <echo>##teamcity[progressMessage |i am here|]</echo>
+        <echo>##teamcity[progressMessage "i am here"]</echo>
         <!-- default the build environment to production if it is unset by this point -->
         <property name="args.environment" value="production"/>
         <property name="CR" value="&#10;"/>
