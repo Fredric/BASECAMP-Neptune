@@ -74,12 +74,12 @@ this file in most cases.
     -->
     <target name="-before-init"/>
     <target name="-init">
-        <echo>##teamcity[testMessage 'textMessageValue']</echo>
+
         <taskdef resource="com/sencha/ant/antlib.xml" 
                  classpath="${cmd.dir}/sencha.jar"
                  loaderref="senchaloader"/>
         <x-sencha-init prefix=""/>
-        
+        <echo>##teamcity[progressMessage 'i am here']</echo>
         <!-- default the build environment to production if it is unset by this point -->
         <property name="args.environment" value="production"/>
         <property name="CR" value="&#10;"/>
