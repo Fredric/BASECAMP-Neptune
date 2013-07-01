@@ -1,5 +1,4 @@
 
-
 Ext.define('BASECAMP.Application', {
     name: 'BASECAMP',
     requires:[
@@ -8,7 +7,7 @@ Ext.define('BASECAMP.Application', {
         'Overrides.*',
         'Abstract.*'
     ],
-    extend: 'Ext.app.Application',
+    extend: 'Ext.app.Application2',
 
     views: [
         // TODO: add views here
