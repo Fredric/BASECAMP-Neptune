@@ -10,15 +10,23 @@
     <target name="-before-page">
         <echo>##teamcity[progressStart 'Creating all-classes.js']</echo>
     </target>
-    <target name="-after-page">
-        <echo>##teamcity[progressFinish 'Done Creating all-classes.js']</echo>
-    </target>
 
     <target name="-before-sass">
         <echo>##teamcity[progressStart 'Creating CSS using Sass']</echo>
     </target>
-    <target name="-after-sass">
-        <echo>##teamcity[progressFinish 'Done Creating CSS']</echo>
+
+    <target name="-before-inherit-resources">
+        <echo>##teamcity[progressStart 'Inheriting resources']</echo>
+    </target>
+
+    <target name="-before-copy-resources">
+        <echo>##teamcity[progressStart 'Copying resources']</echo>
+    </target>
+    <target name="-before-slice">
+        <echo>##teamcity[progressStart 'Slicing images']</echo>
+    </target>
+    <target name="-before-refresh-theme">
+        <echo>##teamcity[progressStart 'Slicing images']</echo>
     </target>
 
 
