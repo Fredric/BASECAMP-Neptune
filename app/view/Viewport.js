@@ -1,5 +1,6 @@
 Ext.define('BASECAMP.view.Viewport', {
 	extend: 'Ext.Viewport',
+    requires:['Ext.layout.container.Border'],
 	layout: {
 		type: 'border'
 	},
