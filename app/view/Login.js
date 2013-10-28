@@ -9,7 +9,7 @@ Ext.define('BASECAMP.view.Login', {
 			{
 				itemId: 'username',
 				xtype: 'textfield',
-				fieldLabel: 'User name'
+				fieldLabel: 'User name2'
 			},
 			{
 				itemId: 'password',
