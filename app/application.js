@@ -14,6 +14,10 @@ Ext.define('BASECAMP.Application', {
 
     autoCreateViewport: false,
 
+    stores:[
+        'AssignedTodoLists'
+    ],
+
     controllers: [
         'Login',
         'Navigation',
@@ -40,9 +44,7 @@ Ext.define('BASECAMP.Application', {
         var me = this;
         me.fireEvent('onProjectSelect', project);
         return project;
-    },
+    }
 
-    stores: [
-        // TODO: add stores here
-    ]
+
 });

@@ -421,7 +421,9 @@ Ext.define('Ext.ux.form.MultiSelect', {
         if (me.rendered) {
             ++me.ignoreSelectChange;
             selModel.deselectAll();
-            selModel.select(me.getRecordsForValue(value));
+            if (value.length) {
+                selModel.select(me.getRecordsForValue(value));
+            }
             --me.ignoreSelectChange;
         } else {
             me.selectOnRender = true;

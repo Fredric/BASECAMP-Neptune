@@ -254,7 +254,7 @@ Ext.define('Ext.ux.CellDragDrop', {
                             });
                         }
 
-                        return;
+                        return false;
                     }
 
                     self.dropOK = true;
