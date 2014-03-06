@@ -2,7 +2,7 @@ Ext.define('BASECAMP.Application', {
     name: 'BASECAMP',
     requires:[
         'Ext.util.History',
-
+        'XLib.*',
         'Overrides.*',
         'Abstract.*'
     ],

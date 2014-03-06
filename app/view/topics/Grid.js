@@ -2,6 +2,7 @@ Ext.define('BASECAMP.view.topics.Grid', {
     extend:'Ext.grid.Panel',
     alias:'widget.topicsgrid',
     store:'Topics',
+    cls:'topicsgrid',
     selModel:{
         type:'rowmodel',
         mode:'MULTI'
