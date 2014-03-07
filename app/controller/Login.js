@@ -1,7 +1,7 @@
 Ext.define('BASECAMP.controller.Login', {
     extend: 'Ext.app.Controller',
     views: ['Login', 'Viewport'],
-    models:['User'],
+    models: ['User'],
     refs: [
         {
             ref: 'login',
@@ -38,7 +38,7 @@ Ext.define('BASECAMP.controller.Login', {
     },
     isLoggedIn: function (user) {
 
-        this.getApplication().currentUser = Ext.create('BASECAMP.model.User',user);
+        this.getApplication().currentUser = Ext.create('BASECAMP.model.User', user);
         this.getController('Navigation').initPaths();
         Ext.create('BASECAMP.view.Viewport');
 
@@ -51,14 +51,14 @@ Ext.define('BASECAMP.controller.Login', {
 
         var username = loginWindow.down('#username').getValue();
         var password = loginWindow.down('#password').getValue();
-		var account = loginWindow.down('#account').getValue();
+        var account = loginWindow.down('#account').getValue();
 
         Ext.Ajax.request({
             url: 'resources/php/login.php',
             params: {
                 user: username,
                 pass: password,
-				account:account
+                account: account
             },
             success: function (response) {
                 loginMask.hide();
