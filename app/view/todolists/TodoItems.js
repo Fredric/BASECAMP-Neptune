@@ -11,7 +11,7 @@ Ext.define('BASECAMP.view.todolists.TodoItems', {
         {header: '', dataIndex: 'content', width: 200, renderer: function (v) {
             return '<b>' + v + '</b>';
         }},
-        {header: '', renderer:function(v, record){
+        {header: '', renderer: function (v, record) {
 
         },
             flex: 1},

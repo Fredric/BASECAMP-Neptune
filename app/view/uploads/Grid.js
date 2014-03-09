@@ -2,17 +2,17 @@ Ext.define('BASECAMP.view.uploads.Grid', {
     extend: 'Ext.grid.Panel',
     alias: 'widget.uploadsgrid',
     store: 'Uploads',
-	loadMask:true,
+    loadMask: true,
     selModel: {
         type: 'rowmodel',
         mode: 'MULTI'
     },
     columns: [
-        {header: 'File Name', dataIndex: 'name', flex:1, renderer: function (v) {
+        {header: 'File Name', dataIndex: 'name', flex: 1, renderer: function (v) {
             return '<b>' + v + '</b>';
         }},
-        {xtype:'datecolumn', header: '', dataIndex: 'created_at'},
-        {xtype:'datecolumn', header: '', dataIndex: 'updated_at'}
+        {xtype: 'datecolumn', header: '', dataIndex: 'created_at'},
+        {xtype: 'datecolumn', header: '', dataIndex: 'updated_at'}
 
     ]
 

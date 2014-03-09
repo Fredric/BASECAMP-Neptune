@@ -5,14 +5,14 @@
  * metadata-driven class system features 
  */
 Ext.Loader.addClassPathMappings({
-  "Abstract": "../../lib/Abstract",
+  "Abstract": "../../lib/abstract",
   "BASECAMP": "../../app",
   "BASECAMP.Application": "../../app/application.js",
   "Ext": "../../ext/src",
   "Ext.Msg": "../../ext/src/window/MessageBox.js",
-  "Ext.rtl.EventObjectImpl": "../../ext/src/rtl/EventObject.js",
   "ExtThemeNeptune": "../../ext/packages/ext-theme-neptune/overrides",
-  "Overrides": "../../lib/Overrides"
+  "Overrides": "../../lib/overrides",
+  "XLib": "../../lib/XLib"
 });
 Ext.ClassManager.addNameAlternateMappings({
   "Abstract.controller.Navigation": [],
@@ -26,6 +26,7 @@ Ext.ClassManager.addNameAlternateMappings({
   "BASECAMP.controller.TodoLists": [],
   "BASECAMP.controller.Topics": [],
   "BASECAMP.controller.Uploads": [],
+  "BASECAMP.model.Assignee": [],
   "BASECAMP.model.Document": [],
   "BASECAMP.model.Event": [],
   "BASECAMP.model.Name": [],
@@ -35,6 +36,7 @@ Ext.ClassManager.addNameAlternateMappings({
   "BASECAMP.model.Topic": [],
   "BASECAMP.model.Upload": [],
   "BASECAMP.model.User": [],
+  "BASECAMP.store.AssignedTodoLists": [],
   "BASECAMP.store.Documents": [],
   "BASECAMP.store.Events": [],
   "BASECAMP.store.Projects": [],
@@ -52,8 +54,8 @@ Ext.ClassManager.addNameAlternateMappings({
   "BASECAMP.view.project.Selector": [],
   "BASECAMP.view.project.UI": [],
   "BASECAMP.view.todolists.Grid": [],
+  "BASECAMP.view.todolists.TodoItems": [],
   "BASECAMP.view.todolists.UI": [],
-  "BASECAMP.view.todolists.Window": [],
   "BASECAMP.view.todos.Grid": [],
   "BASECAMP.view.topics.Grid": [],
   "BASECAMP.view.topics.UI": [],
@@ -461,7 +463,6 @@ Ext.ClassManager.addNameAlternateMappings({
   ],
   "Ext.grid.RowEditor": [],
   "Ext.grid.RowEditorButtons": [],
-  "Ext.grid.Scroller": [],
   "Ext.grid.View": [],
   "Ext.grid.ViewDropZone": [],
   "Ext.grid.column.Action": [
@@ -470,8 +471,9 @@ Ext.ClassManager.addNameAlternateMappings({
   "Ext.grid.column.Boolean": [
     "Ext.grid.BooleanColumn"
   ],
-  "Ext.grid.column.CheckColumn": [
-    "Ext.ux.CheckColumn"
+  "Ext.grid.column.Check": [
+    "Ext.ux.CheckColumn",
+    "Ext.grid.column.CheckColumn"
   ],
   "Ext.grid.column.Column": [
     "Ext.grid.Column"
@@ -650,6 +652,13 @@ Ext.ClassManager.addNameAlternateMappings({
   "Ext.rtl.AbstractComponent": [],
   "Ext.rtl.EventObjectImpl": [],
   "Ext.rtl.button.Button": [],
+  "Ext.rtl.chart.Chart": [],
+  "Ext.rtl.chart.Legend": [],
+  "Ext.rtl.chart.LegendItem": [],
+  "Ext.rtl.chart.axis.Axis": [],
+  "Ext.rtl.chart.axis.Gauge": [],
+  "Ext.rtl.chart.series.Cartesian": [],
+  "Ext.rtl.chart.series.Gauge": [],
   "Ext.rtl.dd.DD": [],
   "Ext.rtl.dom.Element_anim": [],
   "Ext.rtl.dom.Element_insertion": [],
@@ -657,6 +666,8 @@ Ext.ClassManager.addNameAlternateMappings({
   "Ext.rtl.dom.Element_scroll": [],
   "Ext.rtl.dom.Element_static": [],
   "Ext.rtl.dom.Layer": [],
+  "Ext.rtl.draw.Component": [],
+  "Ext.rtl.draw.Sprite": [],
   "Ext.rtl.form.field.Checkbox": [],
   "Ext.rtl.form.field.File": [],
   "Ext.rtl.form.field.Spinner": [],
@@ -664,6 +675,7 @@ Ext.ClassManager.addNameAlternateMappings({
   "Ext.rtl.grid.CellEditor": [],
   "Ext.rtl.grid.RowEditor": [],
   "Ext.rtl.grid.column.Column": [],
+  "Ext.rtl.grid.feature.Summary": [],
   "Ext.rtl.grid.plugin.HeaderResizer": [],
   "Ext.rtl.grid.plugin.RowEditing": [],
   "Ext.rtl.layout.ContextItem": [],
@@ -786,6 +798,7 @@ Ext.ClassManager.addNameAlternateMappings({
   "Ext.util.KeyNav": [
     "Ext.KeyNav"
   ],
+  "Ext.util.LocalStorage": [],
   "Ext.util.LruCache": [],
   "Ext.util.Memento": [],
   "Ext.util.MixedCollection": [],
@@ -893,7 +906,14 @@ Ext.ClassManager.addNameAlternateMappings({
   "ExtThemeNeptune.tab.Tab": [],
   "ExtThemeNeptune.toolbar.Paging": [],
   "ExtThemeNeptune.toolbar.Toolbar": [],
-  "Overrides.data.reader.Reader": []
+  "Overrides.data.reader.Reader": [],
+  "XLib.data.proxy.BrowserDb": [
+    "Ext.data.BdbProxy"
+  ],
+  "XLib.data.proxy.IndexedDb": [
+    "Ext.data.IdbProxy"
+  ],
+  "XLib.db.IndexedDb": []
 });
 Ext.ClassManager.addNameAliasMappings({
   "Abstract.controller.Navigation": [],
@@ -907,6 +927,7 @@ Ext.ClassManager.addNameAliasMappings({
   "BASECAMP.controller.TodoLists": [],
   "BASECAMP.controller.Topics": [],
   "BASECAMP.controller.Uploads": [],
+  "BASECAMP.model.Assignee": [],
   "BASECAMP.model.Document": [],
   "BASECAMP.model.Event": [],
   "BASECAMP.model.Name": [],
@@ -916,6 +937,7 @@ Ext.ClassManager.addNameAliasMappings({
   "BASECAMP.model.Topic": [],
   "BASECAMP.model.Upload": [],
   "BASECAMP.model.User": [],
+  "BASECAMP.store.AssignedTodoLists": [],
   "BASECAMP.store.Documents": [],
   "BASECAMP.store.Events": [],
   "BASECAMP.store.Projects": [],
@@ -951,11 +973,11 @@ Ext.ClassManager.addNameAliasMappings({
   "BASECAMP.view.todolists.Grid": [
     "widget.todolistgrid"
   ],
+  "BASECAMP.view.todolists.TodoItems": [
+    "widget.todoitems"
+  ],
   "BASECAMP.view.todolists.UI": [
     "widget.todolists"
-  ],
-  "BASECAMP.view.todolists.Window": [
-    "widget.todolistmodal"
   ],
   "BASECAMP.view.todos.Grid": [
     "widget.todogrid"
@@ -1410,7 +1432,6 @@ Ext.ClassManager.addNameAliasMappings({
   "Ext.grid.RowEditorButtons": [
     "widget.roweditorbuttons"
   ],
-  "Ext.grid.Scroller": [],
   "Ext.grid.View": [
     "widget.gridview"
   ],
@@ -1421,7 +1442,7 @@ Ext.ClassManager.addNameAliasMappings({
   "Ext.grid.column.Boolean": [
     "widget.booleancolumn"
   ],
-  "Ext.grid.column.CheckColumn": [
+  "Ext.grid.column.Check": [
     "widget.checkcolumn"
   ],
   "Ext.grid.column.Column": [
@@ -1672,6 +1693,13 @@ Ext.ClassManager.addNameAliasMappings({
   "Ext.rtl.AbstractComponent": [],
   "Ext.rtl.EventObjectImpl": [],
   "Ext.rtl.button.Button": [],
+  "Ext.rtl.chart.Chart": [],
+  "Ext.rtl.chart.Legend": [],
+  "Ext.rtl.chart.LegendItem": [],
+  "Ext.rtl.chart.axis.Axis": [],
+  "Ext.rtl.chart.axis.Gauge": [],
+  "Ext.rtl.chart.series.Cartesian": [],
+  "Ext.rtl.chart.series.Gauge": [],
   "Ext.rtl.dd.DD": [],
   "Ext.rtl.dom.Element_anim": [],
   "Ext.rtl.dom.Element_insertion": [],
@@ -1679,6 +1707,8 @@ Ext.ClassManager.addNameAliasMappings({
   "Ext.rtl.dom.Element_scroll": [],
   "Ext.rtl.dom.Element_static": [],
   "Ext.rtl.dom.Layer": [],
+  "Ext.rtl.draw.Component": [],
+  "Ext.rtl.draw.Sprite": [],
   "Ext.rtl.form.field.Checkbox": [],
   "Ext.rtl.form.field.File": [],
   "Ext.rtl.form.field.Spinner": [],
@@ -1686,6 +1716,7 @@ Ext.ClassManager.addNameAliasMappings({
   "Ext.rtl.grid.CellEditor": [],
   "Ext.rtl.grid.RowEditor": [],
   "Ext.rtl.grid.column.Column": [],
+  "Ext.rtl.grid.feature.Summary": [],
   "Ext.rtl.grid.plugin.HeaderResizer": [],
   "Ext.rtl.grid.plugin.RowEditing": [],
   "Ext.rtl.layout.ContextItem": [],
@@ -1815,6 +1846,7 @@ Ext.ClassManager.addNameAliasMappings({
   "Ext.util.Inflector": [],
   "Ext.util.KeyMap": [],
   "Ext.util.KeyNav": [],
+  "Ext.util.LocalStorage": [],
   "Ext.util.LruCache": [],
   "Ext.util.Memento": [],
   "Ext.util.MixedCollection": [],
@@ -1976,11 +2008,18 @@ Ext.ClassManager.addNameAliasMappings({
   "ExtThemeNeptune.tab.Tab": [],
   "ExtThemeNeptune.toolbar.Paging": [],
   "ExtThemeNeptune.toolbar.Toolbar": [],
-  "Overrides.data.reader.Reader": []
+  "Overrides.data.reader.Reader": [],
+  "XLib.data.proxy.BrowserDb": [
+    "proxy.bdb"
+  ],
+  "XLib.data.proxy.IndexedDb": [
+    "proxy.idb"
+  ],
+  "XLib.db.IndexedDb": []
 });
-Ext.setVersion("ext-theme-base", "4.2.1");
-Ext.setVersion("ext-theme-neptune", "4.2.1");
-Ext.setVersion("ext-theme-neutral", "4.2.1");
+Ext.setVersion("ext-theme-base", "4.2.2");
+Ext.setVersion("ext-theme-neptune", "4.2.2");
+Ext.setVersion("ext-theme-neutral", "4.2.2");
 Ext.Loader.loadScript("../../ext/packages/ext-theme-neptune/overrides/Component.js");;
 Ext.Loader.loadScript("../../ext/packages/ext-theme-neptune/overrides/panel/Panel.js");;
 Ext.Loader.loadScript("../../ext/packages/ext-theme-neptune/overrides/toolbar/Toolbar.js");;

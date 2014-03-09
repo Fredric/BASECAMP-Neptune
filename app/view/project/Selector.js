@@ -10,27 +10,27 @@ Ext.define('BASECAMP.view.project.Selector', {
             //margins: '10 10 10 10',
             width: 400,
             xtype: 'combo',
-	        store: 'Projects',
-			emptyText:'Select Basecamp Project',
-			queryMode:'local',
+            store: 'Projects',
+            emptyText: 'Select Basecamp Project',
+            queryMode: 'local',
             displayField: 'name',
             valueField: 'id',
             listConfig: {
-				cls:'projectBoundlist',
+                cls: 'projectBoundlist',
                 itemTpl: '<b>{name}</b><br><span>{[Ext.String.ellipsis(values.description,30)]}</span>'
             }
         },
-		'->',
-		{
-			xtype:'button',
-			iconCls:'icon-plus-alt',
-			//margins: '10 10 10 10',
-			text:'New Project',
-			scale:'medium',
-			handler:function(){
-				Ext.create('BASECAMP.view.project.NewProject').show();
-			}
-		}
+        '->',
+        {
+            xtype: 'button',
+            iconCls: 'icon-plus-alt',
+            //margins: '10 10 10 10',
+            text: 'New Project',
+            scale: 'medium',
+            handler: function () {
+                Ext.create('BASECAMP.view.project.NewProject').show();
+            }
+        }
 
     ]
 });

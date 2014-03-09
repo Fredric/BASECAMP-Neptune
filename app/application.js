@@ -1,6 +1,6 @@
 Ext.define('BASECAMP.Application', {
     name: 'BASECAMP',
-    requires:[
+    requires: [
         'Ext.util.History',
         'XLib.*',
         'Overrides.*',
@@ -14,7 +14,7 @@ Ext.define('BASECAMP.Application', {
 
     autoCreateViewport: false,
 
-    stores:[
+    stores: [
         'AssignedTodoLists'
     ],
 
@@ -22,17 +22,17 @@ Ext.define('BASECAMP.Application', {
         'Login',
         'Navigation',
         'Projects',
-		'Info',
+        'Info',
         'TodoLists',
         'Topics',
         'Uploads',
         'Documents'
     ],
 
-    config:{
-      project:null,
-      user:null,
-      tab:null
+    config: {
+        project: null,
+        user: null,
+        tab: null
     },
 
     launch: function () {
@@ -40,7 +40,7 @@ Ext.define('BASECAMP.Application', {
         this.getController('Login').checkLogin();
     },
 
-    applyProject:function(project){
+    applyProject: function (project) {
         var me = this;
         me.fireEvent('onProjectSelect', project);
         return project;

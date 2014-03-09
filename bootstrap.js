@@ -5,13 +5,14 @@
  * metadata-driven class system features 
  */
 Ext.Loader.addClassPathMappings({
-  "Abstract": "lib/Abstract",
+  "Abstract": "lib/abstract",
   "BASECAMP": "app",
   "BASECAMP.Application": "app/application.js",
   "Ext": "ext/src",
   "Ext.Msg": "ext/src/window/MessageBox.js",
   "ExtThemeNeptune": "ext/packages/ext-theme-neptune/overrides",
-  "Overrides": "lib/Overrides"
+  "Overrides": "lib/overrides",
+  "XLib": "lib/XLib"
 });
 Ext.ClassManager.addNameAlternateMappings({
   "Abstract.controller.Navigation": [],
@@ -25,6 +26,7 @@ Ext.ClassManager.addNameAlternateMappings({
   "BASECAMP.controller.TodoLists": [],
   "BASECAMP.controller.Topics": [],
   "BASECAMP.controller.Uploads": [],
+  "BASECAMP.model.Assignee": [],
   "BASECAMP.model.Document": [],
   "BASECAMP.model.Event": [],
   "BASECAMP.model.Name": [],
@@ -34,6 +36,7 @@ Ext.ClassManager.addNameAlternateMappings({
   "BASECAMP.model.Topic": [],
   "BASECAMP.model.Upload": [],
   "BASECAMP.model.User": [],
+  "BASECAMP.store.AssignedTodoLists": [],
   "BASECAMP.store.Documents": [],
   "BASECAMP.store.Events": [],
   "BASECAMP.store.Projects": [],
@@ -51,8 +54,8 @@ Ext.ClassManager.addNameAlternateMappings({
   "BASECAMP.view.project.Selector": [],
   "BASECAMP.view.project.UI": [],
   "BASECAMP.view.todolists.Grid": [],
+  "BASECAMP.view.todolists.TodoItems": [],
   "BASECAMP.view.todolists.UI": [],
-  "BASECAMP.view.todolists.Window": [],
   "BASECAMP.view.todos.Grid": [],
   "BASECAMP.view.topics.Grid": [],
   "BASECAMP.view.topics.UI": [],
@@ -903,7 +906,14 @@ Ext.ClassManager.addNameAlternateMappings({
   "ExtThemeNeptune.tab.Tab": [],
   "ExtThemeNeptune.toolbar.Paging": [],
   "ExtThemeNeptune.toolbar.Toolbar": [],
-  "Overrides.data.reader.Reader": []
+  "Overrides.data.reader.Reader": [],
+  "XLib.data.proxy.BrowserDb": [
+    "Ext.data.BdbProxy"
+  ],
+  "XLib.data.proxy.IndexedDb": [
+    "Ext.data.IdbProxy"
+  ],
+  "XLib.db.IndexedDb": []
 });
 Ext.ClassManager.addNameAliasMappings({
   "Abstract.controller.Navigation": [],
@@ -917,6 +927,7 @@ Ext.ClassManager.addNameAliasMappings({
   "BASECAMP.controller.TodoLists": [],
   "BASECAMP.controller.Topics": [],
   "BASECAMP.controller.Uploads": [],
+  "BASECAMP.model.Assignee": [],
   "BASECAMP.model.Document": [],
   "BASECAMP.model.Event": [],
   "BASECAMP.model.Name": [],
@@ -926,6 +937,7 @@ Ext.ClassManager.addNameAliasMappings({
   "BASECAMP.model.Topic": [],
   "BASECAMP.model.Upload": [],
   "BASECAMP.model.User": [],
+  "BASECAMP.store.AssignedTodoLists": [],
   "BASECAMP.store.Documents": [],
   "BASECAMP.store.Events": [],
   "BASECAMP.store.Projects": [],
@@ -961,11 +973,11 @@ Ext.ClassManager.addNameAliasMappings({
   "BASECAMP.view.todolists.Grid": [
     "widget.todolistgrid"
   ],
+  "BASECAMP.view.todolists.TodoItems": [
+    "widget.todoitems"
+  ],
   "BASECAMP.view.todolists.UI": [
     "widget.todolists"
-  ],
-  "BASECAMP.view.todolists.Window": [
-    "widget.todolistmodal"
   ],
   "BASECAMP.view.todos.Grid": [
     "widget.todogrid"
@@ -1996,7 +2008,14 @@ Ext.ClassManager.addNameAliasMappings({
   "ExtThemeNeptune.tab.Tab": [],
   "ExtThemeNeptune.toolbar.Paging": [],
   "ExtThemeNeptune.toolbar.Toolbar": [],
-  "Overrides.data.reader.Reader": []
+  "Overrides.data.reader.Reader": [],
+  "XLib.data.proxy.BrowserDb": [
+    "proxy.bdb"
+  ],
+  "XLib.data.proxy.IndexedDb": [
+    "proxy.idb"
+  ],
+  "XLib.db.IndexedDb": []
 });
 Ext.setVersion("ext-theme-base", "4.2.2");
 Ext.setVersion("ext-theme-neptune", "4.2.2");

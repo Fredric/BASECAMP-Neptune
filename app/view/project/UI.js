@@ -7,30 +7,30 @@ Ext.define('BASECAMP.view.project.UI', {
     activeTab: 0,
     plain: true,
     items: [
-		{
-			xtype:'info',
-			itemId:'Info',
-			title:'Project Info'
-		},
+        {
+            xtype: 'info',
+            itemId: 'Info',
+            title: 'Project Info'
+        },
         {
             title: 'Topics',
-			itemId:'Topics',
+            itemId: 'Topics',
             xtype: 'topics'
 
         },
         {
             title: 'TodoLists',
-			itemId:'TodoLists',
+            itemId: 'TodoLists',
             xtype: 'todolists'
         },
         {
             title: 'Files',
-			itemId:'Files',
+            itemId: 'Files',
             xtype: 'uploads'
         },
         {
             title: 'Documents',
-			itemId:'Documents',
+            itemId: 'Documents',
             xtype: 'documents'
         }
 

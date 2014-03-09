@@ -14,14 +14,14 @@ Ext.define('BASECAMP.controller.Documents', {
     },
     initUI: function (project) {
 
-		if(project.get('documents').count !== 0){
-			this.getDocumentsUI().setDisabled(false);
-			this.getDocumentsUI().setTitle('Documents (' + project.get('documents').count + ')');
-			this.loadDocuments(project);
-		}else{
-			this.getDocumentsUI().setTitle('Documents');
-			this.getDocumentsUI().setDisabled(true);
-		}
+        if (project.get('documents').count !== 0) {
+            this.getDocumentsUI().setDisabled(false);
+            this.getDocumentsUI().setTitle('Documents (' + project.get('documents').count + ')');
+            this.loadDocuments(project);
+        } else {
+            this.getDocumentsUI().setTitle('Documents');
+            this.getDocumentsUI().setDisabled(true);
+        }
 
     },
     loadDocuments: function (project) {

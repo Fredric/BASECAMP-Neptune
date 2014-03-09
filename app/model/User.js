@@ -10,11 +10,11 @@ Ext.define('BASECAMP.model.User', {
         {name: 'created_at', type: 'date'},
         {name: 'avatar_url', type: 'string'},
         {name: 'admin', type: 'bool'},
-        {name: 'assigned_todos_count', type: 'float', mapping:'assigned_todos.count'},
-        {name: 'eventscount', type: 'float', mapping:'events.count'}
+        {name: 'assigned_todos_count', type: 'float', mapping: 'assigned_todos.count'},
+        {name: 'eventscount', type: 'float', mapping: 'events.count'}
     ],
 
-    isAdmin:function(){
+    isAdmin: function () {
         return this.get('admin');
     }
 

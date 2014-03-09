@@ -7,11 +7,11 @@ Ext.define('BASECAMP.view.documents.Grid', {
         mode: 'MULTI'
     },
     columns: [
-        {header: 'Document', dataIndex: 'title', flex:1, renderer: function (v) {
+        {header: 'Document', dataIndex: 'title', flex: 1, renderer: function (v) {
             return '<b>' + v + '</b>';
         }},
-        {xtype:'datecolumn', header: '', dataIndex: 'created_at'},
-        {xtype:'datecolumn', header: '', dataIndex: 'updated_at'}
+        {xtype: 'datecolumn', header: '', dataIndex: 'created_at'},
+        {xtype: 'datecolumn', header: '', dataIndex: 'updated_at'}
 
     ]
 
