@@ -22,6 +22,19 @@
 	font-style: normal;
 }
 
+@font-face {
+  font-family: 'RobotoMedium';
+  src: url('fonts/Roboto/Roboto-Regular.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'RobotoMediumCondensed';
+  src: url('fonts/Roboto/RobotoCondensed-Regular.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
 /* Use the following CSS code if you want to use data attributes for inserting your icons */
 [data-icon]:before {
 	font-family: 'icomoon';
