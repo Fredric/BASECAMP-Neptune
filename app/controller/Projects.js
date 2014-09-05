@@ -61,7 +61,9 @@ Ext.define('BASECAMP.controller.Projects', {
 
         if (app.getProject() === null || app.getProject().getId() !== id) {
             Ext.getBody().mask('Loading Project...');
-            Ext.ModelManager.getModel('BASECAMP.model.Project').load(id, {
+
+
+            Ext.data.schema.Schema.lookupEntity('BASECAMP.model.Project').load(id, {
                 success: function (project) {
                     app.setProject(project);
                     me.getProjectCombo().setValue(me.application.getProject().getId());

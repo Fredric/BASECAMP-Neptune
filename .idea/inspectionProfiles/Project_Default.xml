@@ -66,7 +66,6 @@
     <inspection_tool class="ExceptionCaughtLocallyJS" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="FallThroughInSwitchStatementJS" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="FallthroughInSwitchStatementJS" enabled="false" level="WARNING" enabled_by_default="false" />
-    <inspection_tool class="FunctionWithInconsistentReturnsJS" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="HardwiredNamespacePrefix" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="HtmlDeprecatedTag" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="HtmlExtraClosingTag" enabled="false" level="ERROR" enabled_by_default="false" />

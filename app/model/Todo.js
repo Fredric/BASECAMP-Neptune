@@ -1,7 +1,7 @@
 Ext.define('BASECAMP.model.Todo', {
     extend: 'Ext.data.Model',
     requires: [
-        'Ext.data.association.HasOne'
+     //   'Ext.data.association.HasOne'
     ],
     fields: [
         {name: 'id', type: 'float'},
@@ -28,7 +28,7 @@ Ext.define('BASECAMP.model.Todo', {
         url: 'resources/php/todolists/todosByTodolist.php',
         reader: {
             type: 'json',
-            root: 'todos.remaining'
+            rootProperty: 'todos.remaining'
         }
     }
 

@@ -19,7 +19,7 @@ Ext.define('BASECAMP.model.TodoList', {
             return '(' + record.get('completed_count') + '/' + record.get('remaining_count') + ')';
         }}
     ],
-    validations: [
+    validators: [
         {type: 'presence', field: 'name'}
     ],
     proxy: {

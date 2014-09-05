@@ -5,7 +5,7 @@ Ext.define('BASECAMP.view.project.UI', {
         project: null
     },
     activeTab: 0,
-    plain: true,
+   // plain: true,
     items: [
         {
             xtype: 'info',

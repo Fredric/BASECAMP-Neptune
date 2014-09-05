@@ -17,10 +17,10 @@ Ext.define('BASECAMP.model.Project', {
         {name: 'topics', type: 'auto'},
         {name: 'creator', type: 'auto'},
         {name: 'creatorname', type: 'string', convert: function (val, rec) {
-            return rec.data.creator.name;
+           // return rec.data.creator.name;
         }},
         {name: 'creatorurl', type: 'string', convert: function (val, rec) {
-            return rec.data.creator.avatar_url;
+           // return rec.data.creator.avatar_url;
         }}
 
 

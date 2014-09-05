@@ -20,7 +20,8 @@ Ext.define('BASECAMP.store.TodoLists', {
         writer: {
             type: 'json',
             encode: true,
-            root: 'data',
+            writeRecordId:false,
+            rootProperty: 'data',
             batch: false
         }
     },

@@ -13,12 +13,12 @@ Ext.define('BASECAMP.store.Projects', {
         },
         reader: {
             type: 'json',
-            root: 'data'
+            rootProperty: 'data'
         },
         writer: {
             type: 'json',
             encode: true,
-            root: 'data',
+            rootProperty: 'data',
             batch: false
         }
     },

@@ -6,7 +6,7 @@ Ext.define('BASECAMP.store.Events', {
         url: 'resources/php/events.php',
         reader: {
             type: 'json',
-            root: 'data'
+            rootProperty: 'data'
         }
     }
 

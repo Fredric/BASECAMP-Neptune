@@ -18,7 +18,7 @@ Ext.define('BASECAMP.store.AssignedTodoLists', {
         writer: {
             type: 'json',
             encode: true,
-            root: 'data',
+            rootProperty: 'data',
             batch: false
         }
     },

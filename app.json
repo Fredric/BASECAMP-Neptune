@@ -4,5 +4,9 @@
     "requires": [
     ],
 
-    "id": "24b971da-6875-4453-b398-4f9d41999989"
+    "id": "24b971da-6875-4453-b398-4f9d41999989",
+    compatibility: {
+        ext: '4.2'
+    },
+    "theme": "ext-theme-crisp"
 }
