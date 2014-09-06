@@ -1,20 +1,20 @@
 Ext.define('BASECAMP.controller.Projects', {
     extend: 'Ext.app.Controller',
-    views: ['project.Selector', 'project.UI'],
+    views: ['project.Selector', 'project.ProjectUI'],
     models: ['Project'],
     stores: ['Projects'],
     refs: [
         {
             ref: 'projectCombo',
-            selector: 'projectselector > combo'
+            selector: 'projectselectorcombo'
         },
         {
             ref: 'centerPanel',
-            selector: 'viewport > #center'
+            selector: 'project_ui > tabpanel'
         },
         {
             ref: 'projectPanel',
-            selector: 'projectpanel'
+            selector: 'project_ui > tabpanel'
         }
 
     ],
@@ -23,7 +23,7 @@ Ext.define('BASECAMP.controller.Projects', {
 
         me.control({
             'projectselector > combo': {
-                select: me.selectProjectByCombo,
+                //select: me.selectProjectByCombo,
                 afterrender: me.loadProjects
             },
             'projectpanel tab': {
@@ -86,7 +86,7 @@ Ext.define('BASECAMP.controller.Projects', {
     },
     setTab: function (tab) {
 
-        this.getCenterPanel().layout.setActiveItem(1);
+        //this.getCenterPanel().layout.setActiveItem(1);
         this.application.setTab(tab);
 
         if (this.isTabDisabled(tab)) {

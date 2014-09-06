@@ -22,5 +22,5 @@ Ext.application({
 
     extend: 'BASECAMP.Application',
 
-    autoCreateViewport: true
+    autoCreateViewport: false
 });
