@@ -1,4 +1,4 @@
-Ext.define('BASECAMP.view.todolists.Grid', {
+Ext.define('BASECAMP.view.project.todolists.Grid', {
     extend: 'Ext.grid.Panel',
     requires: [
         'Ext.grid.plugin.CellEditing',
@@ -33,14 +33,12 @@ Ext.define('BASECAMP.view.todolists.Grid', {
     columns: [
         {
             header: 'List',
-            xtype: 'templatecolumn',
             flex: 1,
             dataIndex: 'name',
             editor: {
                 xtype: 'textfield',
                 allowBlank: false
-            },
-            tpl: '<b>{name}</b>'
+            }
         },
         {
             header: '',

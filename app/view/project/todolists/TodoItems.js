@@ -1,4 +1,4 @@
-Ext.define('BASECAMP.view.todolists.TodoItems', {
+Ext.define('BASECAMP.view.project.todolists.TodoItems', {
     extend: 'Ext.grid.Panel',
     xtype: 'todoitems',
 

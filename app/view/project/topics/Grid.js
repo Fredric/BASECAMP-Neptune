@@ -1,4 +1,4 @@
-Ext.define('BASECAMP.view.topics.Grid', {
+Ext.define('BASECAMP.view.project.topics.Grid', {
     extend: 'Ext.grid.Panel',
     alias: 'widget.topicsgrid',
     store: 'Topics',

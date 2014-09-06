@@ -1,4 +1,4 @@
-Ext.define('BASECAMP.view.Info.EventGrid', {
+Ext.define('BASECAMP.view.project.info.EventGrid', {
     extend: 'Ext.grid.Panel',
     alias: 'widget.eventgrid',
     store: 'Events',

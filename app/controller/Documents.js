@@ -1,6 +1,6 @@
 Ext.define('BASECAMP.controller.Documents', {
     extend: 'Ext.app.Controller',
-    views: ['documents.Grid', 'documents.UI'],
+    views: ['project.documents.Grid', 'project.documents.UI'],
     models: ['Document'],
     stores: ['Documents'],
     refs: [

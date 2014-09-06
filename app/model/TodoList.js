@@ -23,12 +23,34 @@ Ext.define('BASECAMP.model.TodoList', {
         {type: 'presence', field: 'name'}
     ],
     proxy: {
-        type: 'rest',
-        url: 'resources/php/todolist.php',
+        type: 'ajax',
+        batchActions: false,
+        api: {
+            create: 'resources/php/todolists/create.php',
+            read: 'resources/php/todolists/read.php',
+            update: 'resources/php/todolists/update.php',
+            destroy: 'resources/php/todolists/destroy.php'
+        },
         reader: {
             type: 'json'
+        },
+        writer: {
+            type: 'json',
+            encode: true,
+            //writeRecordId:false,
+            writeAllFields:true,
+            rootProperty: 'data',
+            batch: false
         }
-    }
+    },
+
+//    proxy: {
+//        type: 'rest',
+//        url: 'resources/php/todolist.php',
+//        reader: {
+//            type: 'json'
+//        }
+//    }
     /*
      associations: [
      {

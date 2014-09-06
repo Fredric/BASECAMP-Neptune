@@ -1,6 +1,6 @@
 Ext.define('BASECAMP.controller.TodoLists', {
     extend: 'Abstract.controller.Navigation',
-    views: ['todolists.Grid', 'todolists.UI', 'todolists.TodoItems'],
+    views: ['project.todolists.Grid', 'project.todolists.UI', 'project.todolists.TodoItems'],
     models: ['TodoList', 'Todo', 'Name', 'Assignee'],
     stores: ['TodoLists', 'Todos'],
     refs: [
@@ -18,7 +18,8 @@ Ext.define('BASECAMP.controller.TodoLists', {
         me.control({
             'todolistgrid': {
                 select: function (rowModel, record, index, eOpts) {
-                    this.getTodolistItems().store.load({params: {id: record.getId()}});
+
+                    //this.getTodolistItems().store.load({params: {id: record.getId()}});
                 },
 
                 'edit': function (editor, e) {
@@ -51,7 +52,7 @@ Ext.define('BASECAMP.controller.TodoLists', {
                 }        });
         } else {
             me.getUI().setTitle('Todolists');
-            //me.getUI().setDisabled(true);
+            me.getUI().setDisabled(true);
         }
 
     },

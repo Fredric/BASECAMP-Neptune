@@ -1,6 +1,6 @@
 Ext.define('BASECAMP.controller.Uploads', {
     extend: 'Ext.app.Controller',
-    views: ['uploads.Grid', 'uploads.UI'],
+    views: ['project.uploads.Grid', 'project.uploads.UI'],
     models: ['Upload'],
     stores: ['Uploads'],
     refs: [

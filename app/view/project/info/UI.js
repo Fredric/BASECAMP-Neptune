@@ -1,4 +1,4 @@
-Ext.define('BASECAMP.view.Info.UI', {
+Ext.define('BASECAMP.view.project.info.UI', {
     extend: 'Ext.panel.Panel',
     alias: 'widget.info',
     cls: 'projectinfo',

@@ -1,6 +1,6 @@
-Ext.define('BASECAMP.view.uploads.UI', {
+Ext.define('BASECAMP.view.project.documents.UI', {
     extend: 'Ext.panel.Panel',
-    alias: 'widget.uploads',
+    alias: 'widget.documents',
     layout: {
         type: 'hbox',
         align: 'stretch'
@@ -8,7 +8,7 @@ Ext.define('BASECAMP.view.uploads.UI', {
     items: [
         {
             flex: 1,
-            xtype: 'uploadsgrid'
+            xtype: 'documentsgrid'
         }
 
 

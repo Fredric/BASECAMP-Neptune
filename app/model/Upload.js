@@ -6,7 +6,14 @@ Ext.define('BASECAMP.model.Upload', {
         {name: 'created_at', type: 'date'},
         {name: 'updated_at', type: 'date'}
 
-    ]
+    ],
+    proxy: {
+        type: 'ajax',
+        url: 'resources/php/uploads.php',
+        reader: {
+            type: 'json'
+        }
+    }
 
 });
 

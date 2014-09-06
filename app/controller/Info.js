@@ -1,6 +1,6 @@
 Ext.define('BASECAMP.controller.Info', {
     extend: 'Abstract.controller.Navigation',
-    views: ['Info.UI', 'Info.EventGrid'],
+    views: ['project.info.UI', 'project.info.EventGrid'],
     models: ['Event'],
     stores: ['Events'],
     refs: [

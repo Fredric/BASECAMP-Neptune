@@ -7,7 +7,14 @@ Ext.define('BASECAMP.model.Topic', {
         {name: 'created_at', type: 'date'},
         {name: 'updated_at', type: 'date'}
 
-    ]
+    ],
+    proxy: {
+        type: 'ajax',
+        url: 'resources/php/topics.php',
+        reader: {
+            type: 'json'
+        }
+    }
 
 });
 

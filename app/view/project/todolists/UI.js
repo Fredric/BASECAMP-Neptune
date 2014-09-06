@@ -1,4 +1,4 @@
-Ext.define('BASECAMP.view.todolists.UI', {
+Ext.define('BASECAMP.view.project.todolists.UI', {
     extend: 'Ext.panel.Panel',
     alias: 'widget.todolists',
     layout: {

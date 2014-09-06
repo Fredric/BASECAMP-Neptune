@@ -6,7 +6,14 @@ Ext.define('BASECAMP.model.Document', {
         {name: 'updated_at', type: 'date'},
         {name: 'created_at', type: 'date'}
 
-    ]
+    ],
+    proxy: {
+        type: 'ajax',
+        url: 'resources/php/documents.php',
+        reader: {
+            type: 'json'
+        }
+    }
 
 });
 

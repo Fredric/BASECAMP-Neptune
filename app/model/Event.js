@@ -7,7 +7,15 @@ Ext.define('BASECAMP.model.Event', {
         {name: 'updated_at', type: 'date'},
         {name: 'creator', type: 'string', mapping: 'creator.name'},
         {name: 'creatoricon', type: 'string', mapping: 'creator.avatar_url'}
-    ]
+    ],
+    proxy: {
+        type: 'ajax',
+        url: 'resources/php/events.php',
+        reader: {
+            type: 'json',
+            rootProperty: 'data'
+        }
+    }
 
 });
 
